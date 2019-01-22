@@ -50,42 +50,42 @@ export type SchemaProperty
   | BooleanProperty
 
 export interface Schema {
-  [x:string]: SchemaProperty
+  [x: string]: SchemaProperty
 }
 
-export function isBool (x: any) : x is boolean {
+export function isBool (x: any): x is boolean {
   return typeof x === 'boolean'
 }
 
-export function isString (x: any) : x is string {
+export function isString (x: any): x is string {
   return typeof x === 'string'
 }
 
-export function isNumber (x: any) : x is number {
+export function isNumber (x: any): x is number {
   return typeof x === 'number'
 }
 
-export function isInteger (x: any) : boolean {
+export function isInteger (x: any): boolean {
   return isNumber(x) && Number.isInteger(x)
 }
 
-export function isRegExp (x: any) : boolean {
+export function isRegExp (x: any): boolean {
   try {
-    new RegExp(x)
+    new RegExp(x).test('')
     return true
-  } catch(e) {
+  } catch (e) {
     return false
   }
 }
 
-export function isDefined (x: any) : boolean {
+export function isDefined (x: any): boolean {
   return !isUndefined(x)
 }
 
-export async function loadSchema (file: string, type: SchemaFileType) : Promise<Schema> {
-  let schema : Schema
+export async function loadSchema (file: string, type: SchemaFileType): Promise<Schema> {
+  let schema: Schema
 
-  switch(type) {
+  switch (type) {
     case 'json':
     case 'js':
       schema = await import(file)
@@ -115,7 +115,7 @@ export function validateSchema (options: Options, schema: Schema) {
 
     if (isUndefined(property.required)) property.required = true
 
-    switch(property.type) {
+    switch (property.type) {
       case 'number':
         for (const key in property) {
           switch (key) {
@@ -240,7 +240,7 @@ export function validateSchema (options: Options, schema: Schema) {
   }
 }
 
-export function applySchema<E extends Env> (options: Options, raw: Raw<E>, schema: Schema) : E {
+export function applySchema<E extends Env> (options: Options, raw: Raw<E>, schema: Schema): E {
   const result = {} as E
 
   for (const key in raw) {

@@ -1,12 +1,23 @@
-import { Options, loadOptions, Env, loadEnv, Schema, loadSchema, validateSchema, applySchema } from '.'
+/* eslint-disable no-unused-vars */
+
+import {
+  Options,
+  loadOptions,
+  Env,
+  loadEnv,
+  Schema,
+  loadSchema,
+  validateSchema,
+  applySchema
+} from '.'
 import * as path from 'path'
 import * as fs from 'fs'
 
-export async function load <Config extends Env = Env> (schema: Schema, options: Partial<Options>) : Promise<Config>
-export async function load <Config extends Env = Env> (options?: Partial<Options>) : Promise<Config>
-export async function load <Config extends Env = Env> (...args: any[]) : Promise<Config> {
-  let options : Options
-  let schema : Schema
+export async function load <Config extends Env = Env> (schema: Schema, options: Partial<Options>): Promise<Config>
+export async function load <Config extends Env = Env> (options?: Partial<Options>): Promise<Config>
+export async function load <Config extends Env = Env> (...args: any[]): Promise<Config> {
+  let options: Options
+  let schema: Schema
 
   switch (args.length) {
     case 0:
@@ -16,8 +27,9 @@ export async function load <Config extends Env = Env> (...args: any[]) : Promise
       options = await loadOptions(args[0])
       break
     case 2:
-      options = await loadOptions(args[1]);
+      options = await loadOptions(args[1])
       schema = args[0]
+      break
     default: throw new Error(`Expected up to two arguments. Got ${args.length}`)
   }
 

@@ -1,4 +1,4 @@
-import { Schema, SyntaxError, parse } from '.'
+import { SyntaxError, parse } from '.'
 import * as fs from 'fs'
 
 export interface Document {
@@ -25,20 +25,20 @@ export interface Literal {
 }
 
 export interface Env {
-  [x:string]: string | boolean | number
+  [x: string]: string | boolean | number
 }
 
 export type Raw <E extends Env> = {
   [K in keyof E]: string
 }
 
-export async function loadEnv<E extends Env> (source) : Promise<Raw<E>> {
+export async function loadEnv<E extends Env> (source): Promise<Raw<E>> {
   let buffer = await new Promise((resolve, reject) => {
     fs.readFile(source, (err, buffer) => {
       err ? reject(err) : resolve(buffer)
     })
   })
-  let document : Document
+  let document: Document
 
   try {
     document = parse(buffer.toString())

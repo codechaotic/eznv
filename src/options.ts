@@ -2,7 +2,6 @@ import * as assert from 'assert'
 import * as path from 'path'
 import { promisify } from 'util'
 import * as fs from 'fs'
-import { clearScreenDown } from 'readline';
 
 export type SchemaFileType = 'js' | 'json' | 'yaml'
 export type EnvFileType = 'env'
@@ -20,13 +19,13 @@ export interface Options {
 const R_OK = fs.constants.R_OK
 const access = promisify(fs.access)
 
-const schemaTypes : SchemaFileType[] = [
+const schemaTypes: SchemaFileType[] = [
   'js',
   'json',
   'yaml'
 ]
 
-const envTypes : EnvFileType[] = [
+const envTypes: EnvFileType[] = [
   'env'
 ]
 
@@ -41,7 +40,7 @@ const envCandidates = [
   '.env'
 ]
 
-export async function loadOptions (custom: Partial<Options> = {}) : Promise<Options> {
+export async function loadOptions (custom: Partial<Options> = {}): Promise<Options> {
   const options = {
     cwd: path.resolve(process.cwd(), custom.cwd || '.')
   } as Options
@@ -58,7 +57,7 @@ export async function loadOptions (custom: Partial<Options> = {}) : Promise<Opti
         await access(schemaFile, R_OK)
         options.schemaFile = schemaFile
         break
-      } catch (error) {}
+      } catch (error) {/* do nothing */}
     }
     if (!options.schemaFile) throw new Error('No candidate found for schema file')
   }
@@ -72,7 +71,7 @@ export async function loadOptions (custom: Partial<Options> = {}) : Promise<Opti
         const envFile = path.resolve(options.cwd, candidate)
         await access(envFile, R_OK)
         options.envFile = envFile
-      } catch (error) {}
+      } catch (error) {/* do nothing */}
     }
     if (!options.envFile) throw new Error('No candidate found for env file')
   }
@@ -82,7 +81,7 @@ export async function loadOptions (custom: Partial<Options> = {}) : Promise<Opti
     assert(schemaTypes.includes(options.schemaType), `Schema Type must be 'js', 'json', or 'yaml'`)
   } else {
     const ext = path.extname(options.schemaFile)
-    const type : SchemaFileType = {
+    const type: SchemaFileType = {
       '.js': 'js',
       '.json': 'json',
       '.yml': 'yaml',
