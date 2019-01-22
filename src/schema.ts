@@ -2,7 +2,19 @@ import * as fs from 'fs'
 import * as path from 'path'
 import * as assert from 'assert'
 
-import { SchemaFileType, Raw, Env, Options } from '.'
+import {
+  isDefined,
+  isUndefined,
+  isBool,
+  isInteger,
+  isNumber,
+  isRegExp,
+  isString,
+  SchemaFileType,
+  Raw,
+  Env,
+  Options
+} from '.'
 
 const readFile = (file) => new Promise((resolve, reject) => {
   fs.readFile(file, (err, data) => {
@@ -57,39 +69,6 @@ export interface Schema {
   [x: string]: SchemaProperty
 }
 
-export function isBool (x: any): x is boolean {
-  return typeof x === 'boolean'
-}
-
-export function isString (x: any): x is string {
-  return typeof x === 'string'
-}
-
-export function isNumber (x: any): x is number {
-  return typeof x === 'number'
-}
-
-export function isInteger (x: any): boolean {
-  return isNumber(x) && Number.isInteger(x)
-}
-
-export function isRegExp (x: any): boolean {
-  try {
-    new RegExp(x).test('')
-    return true
-  } catch (e) {
-    return false
-  }
-}
-
-export function isUndefined (x: any): boolean {
-  return x === undefined
-}
-
-export function isDefined (x: any): boolean {
-  return !isUndefined(x)
-}
-
 export async function loadSchema (file: string, type: SchemaFileType): Promise<Schema> {
   let schema: Schema
 
@@ -120,8 +99,6 @@ export function validateSchema (options: Options, schema: Schema) {
     assert(VARNAME_REGEXP.test(key), `Invalid Schema Property Name ${key}`)
     assert(property, `Invalid Schema Property Value ${key}`)
     assert(property instanceof Object, `Invalid Schema Property Value ${key}`)
-
-    if (isUndefined(property.required)) property.required = true
 
     switch (property.type) {
       case 'number':
@@ -262,7 +239,7 @@ export function applySchema<E extends Env> (options: Options, raw: Raw<E>, schem
     const value = raw[key]
 
     if (isUndefined(value)) {
-      if (property.required) {
+      if (isUndefined(property.required) || property.required) {
         if (isUndefined(property.default) && options.errorOnMissing) {
           throw new Error(`Missing env variable ${key}`)
         } else {

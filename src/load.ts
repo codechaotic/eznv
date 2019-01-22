@@ -43,5 +43,9 @@ export async function load <Config extends Env = Env> (...args: any[]): Promise<
 
   const result = applySchema(options, env, schema)
 
+  if (options.override) {
+    Object.assign(process.env, result)
+  }
+
   return result
 }

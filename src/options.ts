@@ -2,6 +2,12 @@ import * as assert from 'assert'
 import * as path from 'path'
 import * as fs from 'fs'
 
+import {
+  isDefined,
+  isBool,
+  isString
+} from '.'
+
 export type SchemaFileType = 'js' | 'json' | 'yaml'
 export type EnvFileType = 'env'
 
@@ -13,6 +19,7 @@ export interface Options {
   envType: EnvFileType
   errorOnMissing: boolean
   errorOnExtra: boolean
+  override: boolean
 }
 
 const R_OK = fs.constants.R_OK
@@ -41,17 +48,24 @@ const schemaCandidates = [
 ]
 
 const envCandidates = [
+  `.env.${process.env.NODE_ENV}`,
   '.env'
 ]
 
 export async function loadOptions (custom: Partial<Options> = {}): Promise<Options> {
-  const options = {
-    cwd: path.resolve(process.cwd(), custom.cwd || '.')
-  } as Options
+  const options = { } as Options
+
+  if (isDefined(custom.cwd)) {
+    assert(isString(custom.cwd), `Option cwd must be boolean`)
+    options.cwd = path.resolve(process.cwd(), custom.cwd)
+  } else {
+    options.cwd = process.cwd()
+  }
 
   await access(options.cwd, R_OK)
 
-  if (custom.schemaFile) {
+  if (isDefined(custom.schemaFile)) {
+    assert(isString(custom.schemaFile), `Option schemaFile must be boolean`)
     options.schemaFile = path.resolve(options.cwd, custom.schemaFile)
     await access(options.schemaFile, R_OK)
   } else {
@@ -66,7 +80,8 @@ export async function loadOptions (custom: Partial<Options> = {}): Promise<Optio
     if (!options.schemaFile) throw new Error('No candidate found for schema file')
   }
 
-  if (custom.envFile) {
+  if (isDefined(custom.envFile)) {
+    assert(isString(custom.envFile), `Option envFile must be boolean`)
     options.envFile = path.resolve(options.cwd, custom.envFile)
     await access(options.envFile, R_OK)
   } else {
@@ -80,9 +95,10 @@ export async function loadOptions (custom: Partial<Options> = {}): Promise<Optio
     if (!options.envFile) throw new Error('No candidate found for env file')
   }
 
-  if (custom.schemaType) {
+  if (isDefined(custom.schemaType)) {
+    assert(isString(custom.schemaType), `Option schemaType must be boolean`)
     options.schemaType = custom.schemaType
-    assert(schemaTypes.includes(options.schemaType), `Schema Type must be 'js', 'json', or 'yaml'`)
+    assert(schemaTypes.includes(options.schemaType), `Option schemaType must be 'js', 'json', or 'yaml'`)
   } else {
     const ext = path.extname(options.schemaFile)
     const type: SchemaFileType = {
@@ -95,25 +111,33 @@ export async function loadOptions (custom: Partial<Options> = {}): Promise<Optio
     options.schemaType = type
   }
 
-  if (custom.envType) {
+  if (isDefined(custom.envType)) {
+    assert(isString(custom.envType), `Option envType must be boolean`)
     options.envType = custom.envType
-    assert(envTypes.includes(options.envType), `Env Type must be 'env'`)
+    assert(envTypes.includes(options.envType), `Option envType must be 'env'`)
   } else {
     options.envType = 'env'
   }
 
-  if (custom.errorOnMissing) {
-    assert(typeof custom.errorOnMissing === 'boolean', `Option errorOnMissing must be boolean`)
+  if (isDefined(custom.errorOnMissing)) {
+    assert(isBool(custom.errorOnMissing), `Option errorOnMissing must be boolean`)
     options.errorOnMissing = custom.errorOnMissing
   } else {
     options.errorOnMissing = true
   }
 
-  if (custom.errorOnExtra) {
-    assert(typeof custom.errorOnExtra === 'boolean', `Option errorOnExtra must be boolean`)
+  if (isDefined(custom.errorOnExtra)) {
+    assert(isBool(custom.errorOnMissing), `Option errorOnExtra must be boolean`)
     options.errorOnExtra = custom.errorOnExtra
   } else {
     options.errorOnExtra = true
+  }
+
+  if (isDefined(custom.override)) {
+    assert(isBool(custom.override), `Option override must be boolean`)
+    options.override = custom.override
+  } else {
+    options.override = false
   }
 
   return options

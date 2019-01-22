@@ -18,7 +18,7 @@
   "scripts": {
     "build": "tsc",
     "clean": "rimraf {test,src}/**/*{.d.ts,.d.ts.map,.js,.js.map}",
-    "lint": "tslint --exclude src/parse.ts src/**/*.ts",
+    "lint": "tslint src/**/*.ts",
     "compile": "pegjs --plugin ts-pegjs -o src/parse.ts src/parse.pegjs",
     "coverage": "nyc report --reporter=html && opn ./coverage/index.html",
     "report-coverage": "nyc report --reporter=text-lcov | coveralls",

@@ -1,3 +1,4 @@
+export * from './guard'
 export * from './options'
 export * from './parse'
 export * from './env'
