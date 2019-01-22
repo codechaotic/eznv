@@ -1,6 +1,5 @@
 import * as assert from 'assert'
 import * as path from 'path'
-import { promisify } from 'util'
 import * as fs from 'fs'
 
 export type SchemaFileType = 'js' | 'json' | 'yaml'
@@ -17,7 +16,12 @@ export interface Options {
 }
 
 const R_OK = fs.constants.R_OK
-const access = promisify(fs.access)
+const access = (file, access) => new Promise((resolve, reject) => {
+  fs.access(file, access, (err) => {
+    if (err) reject(err)
+    else resolve()
+  })
+})
 
 const schemaTypes: SchemaFileType[] = [
   'js',

@@ -1,11 +1,15 @@
 import * as fs from 'fs'
 import * as path from 'path'
 import * as assert from 'assert'
-import { promisify, isUndefined } from 'util'
 
 import { SchemaFileType, Raw, Env, Options } from '.'
 
-const readFile = promisify(fs.readFile)
+const readFile = (file) => new Promise((resolve, reject) => {
+  fs.readFile(file, (err, data) => {
+    if (err) reject(err)
+    else resolve(data)
+  })
+})
 const VARNAME_REGEXP = /^[A-Z][A-Z0-9]*(?:_?[A-Z0-9]+)*$/
 
 export interface Property {
@@ -76,6 +80,10 @@ export function isRegExp (x: any): boolean {
   } catch (e) {
     return false
   }
+}
+
+export function isUndefined (x: any): boolean {
+  return x === undefined
 }
 
 export function isDefined (x: any): boolean {
