@@ -1,0 +1,6 @@
+node_modules/
+coverage/
+.nyc_output/
+mocha.opts
+wercker.yml
+*.spec.js

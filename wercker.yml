@@ -1,0 +1,29 @@
+test:
+  box: node:6.4.0
+  steps:
+    - npm-install
+    - npm-test
+    - script:
+      name: lint
+      code: npm run lint
+
+coverage:
+  box: node:6.4.0
+  steps:
+    - npm-install
+    - npm-test
+    - script:
+      name: coverage
+      code: |
+        npm run report-coverage
+
+release:
+  box: node:6.4.0
+  steps:
+    - npm-install
+    - script:
+      name: build
+      code: npm run build
+    - script:
+      name: npm publish
+      code: npm publish

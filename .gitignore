@@ -1,0 +1,10 @@
+dist/
+type/
+node_modules/
+coverage/
+src/parse.ts
+.nyc_output/
+*.js
+*.js.map
+*.d.ts
+*.d.ts.map
