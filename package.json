@@ -1,18 +1,19 @@
 {
-  "name": "envio",
+  "name": "eznv",
   "version": "0.1.0",
   "engines": {
     "node": ">=6.4.0"
   },
-  "description": "Env Management without Fuss",
+  "description": "Env Management without the fuss",
   "main": "src",
   "types": "src",
   "author": "Asa Jones <thinkinfractals@gmail.com> (https://github.com/codechaotic)",
   "license": "ISC",
   "keywords": [
     "env",
+    "environment",
     "dotenv",
-    "configuration"
+    "config"
   ],
   "scripts": {
     "build": "tsc",
@@ -25,10 +26,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/codechaotic/envio"
+    "url": "https://github.com/codechaotic/eznv"
   },
   "bugs": {
-    "url": "https://github.com/codechaotic/envio/issues"
+    "url": "https://github.com/codechaotic/eznv/issues"
   },
   "nyc": {
     "extension": [
