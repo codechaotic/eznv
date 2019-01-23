@@ -65,34 +65,17 @@ export type SchemaProperty
   | StringProperty
   | BooleanProperty
 
-export interface Schema {
+export interface Properties {
   [x: string]: SchemaProperty
 }
 
-export async function loadSchema (file: string, type: SchemaFileType): Promise<Schema> {
-  let schema: Schema
-
-  switch (type) {
-    case 'json':
-    case 'js':
-      schema = await import(file)
-      break
-    case 'yaml':
-      const yaml = await import('yaml')
-      const buffer = await readFile(file)
-      schema = yaml.parse(buffer.toString())
-      break
-    default:
-      throw new Error(`Unrecognized schema type ${type}`)
-  }
-
-  assert(schema, 'Invalid Schema')
-  assert(schema instanceof Object, 'Invalid Schema')
-
-  return schema
+export type Validator <E extends Env> = {
+  [Key in keyof E]: SchemaProperty
 }
 
-export function validateSchema (options: Options, schema: Schema) {
+export type Schema <E extends Env> = Validator<E> & Properties
+
+export function validateSchema <E extends Env> (options: Options, schema: Schema<E>) {
   for (const key in schema) {
     const property = schema[key]
 
@@ -225,7 +208,7 @@ export function validateSchema (options: Options, schema: Schema) {
   }
 }
 
-export function applySchema<E extends Env> (options: Options, raw: Raw<E>, schema: Schema): E {
+export function applySchema<E extends Env> (options: Options, raw: Raw<E>, schema: Schema<E>): E {
   const result = {} as E
 
   for (const key in raw) {
