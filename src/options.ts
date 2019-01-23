@@ -13,10 +13,7 @@ export type EnvFileType = 'env'
 
 export interface Options {
   cwd: string
-  schemaFile: string
-  schemaType: SchemaFileType
   envFile: string
-  envType: EnvFileType
   errorOnMissing: boolean
   errorOnExtra: boolean
   override: boolean
@@ -30,30 +27,8 @@ const access = (file, access) => new Promise((resolve, reject) => {
   })
 })
 
-const schemaTypes: SchemaFileType[] = [
-  'js',
-  'json',
-  'yaml'
-]
-
-const envTypes: EnvFileType[] = [
-  'env'
-]
-
-const schemaCandidates = [
-  'schema.json',
-  'schema.js',
-  'schema.yaml',
-  'schema.yml'
-]
-
-const envCandidates = [
-  `.env.${process.env.NODE_ENV}`,
-  '.env'
-]
-
 export async function loadOptions (custom: Partial<Options> = {}): Promise<Options> {
-  const options = { } as Options
+  const options = {} as Options
 
   if (isDefined(custom.cwd)) {
     assert(isString(custom.cwd), `Option cwd must be boolean`)
@@ -64,59 +39,13 @@ export async function loadOptions (custom: Partial<Options> = {}): Promise<Optio
 
   await access(options.cwd, R_OK)
 
-  if (isDefined(custom.schemaFile)) {
-    assert(isString(custom.schemaFile), `Option schemaFile must be boolean`)
-    options.schemaFile = path.resolve(options.cwd, custom.schemaFile)
-    await access(options.schemaFile, R_OK)
-  } else {
-    for (const candidate of schemaCandidates) {
-      try {
-        const schemaFile = path.resolve(options.cwd, candidate)
-        await access(schemaFile, R_OK)
-        options.schemaFile = schemaFile
-        break
-      } catch (error) {/* do nothing */}
-    }
-    if (!options.schemaFile) throw new Error('No candidate found for schema file')
-  }
-
   if (isDefined(custom.envFile)) {
     assert(isString(custom.envFile), `Option envFile must be boolean`)
     options.envFile = path.resolve(options.cwd, custom.envFile)
     await access(options.envFile, R_OK)
   } else {
-    for (const candidate of envCandidates) {
-      try {
-        const envFile = path.resolve(options.cwd, candidate)
-        await access(envFile, R_OK)
-        options.envFile = envFile
-      } catch (error) {/* do nothing */}
-    }
-    if (!options.envFile) throw new Error('No candidate found for env file')
-  }
-
-  if (isDefined(custom.schemaType)) {
-    assert(isString(custom.schemaType), `Option schemaType must be boolean`)
-    options.schemaType = custom.schemaType
-    assert(schemaTypes.includes(options.schemaType), `Option schemaType must be 'js', 'json', or 'yaml'`)
-  } else {
-    const ext = path.extname(options.schemaFile)
-    const type: SchemaFileType = {
-      '.js': 'js',
-      '.json': 'json',
-      '.yml': 'yaml',
-      '.yaml': 'yaml'
-    }[ext]
-    assert(type, `Unknown schema file extension ${ext}. Expected .js .json .yml or .yaml`)
-    options.schemaType = type
-  }
-
-  if (isDefined(custom.envType)) {
-    assert(isString(custom.envType), `Option envType must be boolean`)
-    options.envType = custom.envType
-    assert(envTypes.includes(options.envType), `Option envType must be 'env'`)
-  } else {
-    options.envType = 'env'
+    options.envFile = path.resolve(options.cwd, '.env')
+    await access(options.envFile, R_OK)
   }
 
   if (isDefined(custom.errorOnMissing)) {
