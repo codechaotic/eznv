@@ -15,6 +15,6 @@ const expect = chai.expect
 
 describe('load()', function () {
   it('is a function', function () {
-    expect(Envio.load).to.be.a('function')
+    expect(Envio.loadEnv).to.be.a('function')
   })
 })
