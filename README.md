@@ -34,9 +34,7 @@ Note that defining the schema in-line with the function call as shown above is i
 
 ```ts
 const s = {
-  SOME_INT: {
-    VAR: { type: 'integer' }
-  }
+  VAR: { type: 'integer' }
 }
 
 // ERROR Type Mismatch
@@ -48,13 +46,22 @@ To get around this EZNV provides a helper function `Schema` which can be used wh
 
 ```ts
 const s = EZNV.Schema({
-  SOME_INT: {
-    VAR: { type: 'integer' }
-  }
+  VAR: { type: 'integer' }
 })
 
 // OK!
 EZNV.loadEnv(schema).then(env => {})
+```
+
+Additionally, a helper type `Env` can be used to access the result type directly based on a schema. This will be useful if you want to override `process.env`.
+
+```ts
+  const s = EZNV.Schema({
+    VAR: { type: 'integer' }
+  })
+
+  // Env = { VAR: number }
+  type Env = EZNV.Env<typeof s>
 ```
 
 ## Schema Properties
@@ -182,9 +189,11 @@ const schema = EZNV.Schema({
   VAR: { type: 'integer' }
 })
 
+type Env = EZNV.Env<typeof schema>
+
 declare global {
   namespace NodeJS {
-    interface ProcessEnv extends EZNV.Env<typeof schema> {}
+    interface ProcessEnv extends Env {}
   }
 }
 
