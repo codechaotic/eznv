@@ -3,142 +3,58 @@ import * as path from 'path'
 import * as fs from 'fs'
 
 import {
-  isDefined,
-  isBool,
-  isString
+  Guard,
+  Options
 } from '.'
 
-export type SchemaFileType = 'js' | 'json' | 'yaml'
-export type EnvFileType = 'env'
-
-export interface Options {
-  cwd: string
-  schemaFile: string
-  schemaType: SchemaFileType
-  envFile: string
-  envType: EnvFileType
-  errorOnMissing: boolean
-  errorOnExtra: boolean
-  override: boolean
-}
-
-const R_OK = fs.constants.R_OK
-const access = (file, access) => new Promise((resolve, reject) => {
-  fs.access(file, access, (err) => {
+const isReadable = (file) => new Promise((resolve, reject) => {
+  fs.access(file, fs.constants.R_OK, (err) => {
     if (err) reject(err)
     else resolve()
   })
 })
 
-const schemaTypes: SchemaFileType[] = [
-  'js',
-  'json',
-  'yaml'
-]
+export async function loadOptions (options: Options = {}): Promise<Options> {
+  const opts: Options = {}
 
-const envTypes: EnvFileType[] = [
-  'env'
-]
-
-const schemaCandidates = [
-  'schema.json',
-  'schema.js',
-  'schema.yaml',
-  'schema.yml'
-]
-
-const envCandidates = [
-  `.env.${process.env.NODE_ENV}`,
-  '.env'
-]
-
-export async function loadOptions (custom: Partial<Options> = {}): Promise<Options> {
-  const options = { } as Options
-
-  if (isDefined(custom.cwd)) {
-    assert(isString(custom.cwd), `Option cwd must be boolean`)
-    options.cwd = path.resolve(process.cwd(), custom.cwd)
+  if (Guard.isDefined(options.cwd)) {
+    assert(Guard.isString(options.cwd), `Option cwd must be boolean`)
+    opts.cwd = path.resolve(process.cwd(), options.cwd)
   } else {
-    options.cwd = process.cwd()
+    opts.cwd = process.cwd()
   }
 
-  await access(options.cwd, R_OK)
+  await isReadable(opts.cwd)
 
-  if (isDefined(custom.schemaFile)) {
-    assert(isString(custom.schemaFile), `Option schemaFile must be boolean`)
-    options.schemaFile = path.resolve(options.cwd, custom.schemaFile)
-    await access(options.schemaFile, R_OK)
+  if (Guard.isDefined(options.envFile)) {
+    assert(Guard.isString(options.envFile), `Option envFile must be boolean`)
+    opts.envFile = path.resolve(opts.cwd, options.envFile)
+    await isReadable(opts.envFile)
   } else {
-    for (const candidate of schemaCandidates) {
-      try {
-        const schemaFile = path.resolve(options.cwd, candidate)
-        await access(schemaFile, R_OK)
-        options.schemaFile = schemaFile
-        break
-      } catch (error) {/* do nothing */}
-    }
-    if (!options.schemaFile) throw new Error('No candidate found for schema file')
+    opts.envFile = path.resolve(opts.cwd, '.env')
+    await isReadable(opts.envFile)
   }
 
-  if (isDefined(custom.envFile)) {
-    assert(isString(custom.envFile), `Option envFile must be boolean`)
-    options.envFile = path.resolve(options.cwd, custom.envFile)
-    await access(options.envFile, R_OK)
+  if (Guard.isDefined(options.errorOnMissing)) {
+    assert(Guard.isBool(options.errorOnMissing), `Option errorOnMissing must be boolean`)
+    opts.errorOnMissing = options.errorOnMissing
   } else {
-    for (const candidate of envCandidates) {
-      try {
-        const envFile = path.resolve(options.cwd, candidate)
-        await access(envFile, R_OK)
-        options.envFile = envFile
-      } catch (error) {/* do nothing */}
-    }
-    if (!options.envFile) throw new Error('No candidate found for env file')
+    opts.errorOnMissing = true
   }
 
-  if (isDefined(custom.schemaType)) {
-    assert(isString(custom.schemaType), `Option schemaType must be boolean`)
-    options.schemaType = custom.schemaType
-    assert(schemaTypes.includes(options.schemaType), `Option schemaType must be 'js', 'json', or 'yaml'`)
+  if (Guard.isDefined(options.errorOnExtra)) {
+    assert(Guard.isBool(options.errorOnMissing), `Option errorOnExtra must be boolean`)
+    opts.errorOnExtra = options.errorOnExtra
   } else {
-    const ext = path.extname(options.schemaFile)
-    const type: SchemaFileType = {
-      '.js': 'js',
-      '.json': 'json',
-      '.yml': 'yaml',
-      '.yaml': 'yaml'
-    }[ext]
-    assert(type, `Unknown schema file extension ${ext}. Expected .js .json .yml or .yaml`)
-    options.schemaType = type
+    opts.errorOnExtra = true
   }
 
-  if (isDefined(custom.envType)) {
-    assert(isString(custom.envType), `Option envType must be boolean`)
-    options.envType = custom.envType
-    assert(envTypes.includes(options.envType), `Option envType must be 'env'`)
+  if (Guard.isDefined(options.override)) {
+    assert(Guard.isBool(options.override), `Option override must be boolean`)
+    opts.override = options.override
   } else {
-    options.envType = 'env'
+    opts.override = false
   }
 
-  if (isDefined(custom.errorOnMissing)) {
-    assert(isBool(custom.errorOnMissing), `Option errorOnMissing must be boolean`)
-    options.errorOnMissing = custom.errorOnMissing
-  } else {
-    options.errorOnMissing = true
-  }
-
-  if (isDefined(custom.errorOnExtra)) {
-    assert(isBool(custom.errorOnMissing), `Option errorOnExtra must be boolean`)
-    options.errorOnExtra = custom.errorOnExtra
-  } else {
-    options.errorOnExtra = true
-  }
-
-  if (isDefined(custom.override)) {
-    assert(isBool(custom.override), `Option override must be boolean`)
-    options.override = custom.override
-  } else {
-    options.override = false
-  }
-
-  return options
+  return opts
 }

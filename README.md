@@ -15,107 +15,54 @@ npm i --save eznv
 ### Import it into your code
 
 ```ts
-import { load } from eznv
+import EZNV from eznv
 ```
 
 ### Define a Schema
 
-Eznv uses a special object to validate a loaded env file. By default when calling `load` Eznv will search for a compatible file named *schema* with an extension of *js*, *json*, *yaml* or *yml*. If found it will import it using the appropriate importer based on the extension. **When using a yaml format you must install `yaml` package alongside `eznv`**.
-
-Here are some examples of schema files in different formats
-
-**YAML**
-```yaml
-SOME_STRING:
-  type: string
-  default: test
-
-SOME_INT:
-  type: integer
-  required: false
-```
-
-**JSON**
-```json
-{
-  "SOME_STRING": {
-    "type": "string",
-    "default": "test"
-  },
-  "SOME_INT": {
-    "type": "integer",
-    "required": false
-  }
-}
-```
-
-**JavaScript**
-```js
-module.exports = {
-  SOME_STRING: {
-    type: 'string',
-    default: 'test'
-  },
-  SOME_INT: {
-    type: 'integer',
-    required: false
-  }
-}
-```
-
-**TypeScript**
-```ts
-export {
-  SOME_STRING: {
-    type: 'string',
-    default: 'test'
-  },
-  SOME_INT: {
-    type: 'integer',
-    required: false
-  }
-}
-```
-
-## Create an Interface
-
-This schema is used to validate the provided dotenv file, but doesn't define any typing for the resulting object. To add a type to the object returned from `load` you'll need to create a TypeScript interface mirroring the properties on your schema, and give that to the `load` method as a generic type parameter.
-
-This step is optional, but recommended. If a type is not given the return type will be `any`.
+EZNV uses a schema object to validate an env file and to determine the type of the resulting Env object.
 
 ```ts
-import { Env } from 'eznv'
-
-export interface EnvTypes extends Env {
-  SOME_STRING: string
-  SOME_INT: number
-}
+  EZNV.loadEnv({
+    VAR: { type: 'integer' }
+  }).then(env => {
+    env.VAR // number
+  })
 ```
 
-## Load your Env File
-
-Loading the env is done with the `load` method.
+Note that defining the schema in-line with the function call as shown above is important for TypeScript to correctly infer the result type. Defining the schema elsewhere will cause a typing error.
 
 ```ts
-import { load } from 'eznv'
+const s = {
+  VAR: { type: 'integer' }
+}
 
-load<EnvTypes>().then(env => {
-  console.log(env.SOME_STRING) // OK!
+// ERROR Type Mismatch
+// { type: string } cannot be converted to { type: 'integer' }
+EZNV.loadEnv(schema).then(env => {})
+```
+
+To get around this EZNV provides a helper function `Schema` which can be used when in-line definition isn't preferred.
+
+```ts
+const s = EZNV.Schema({
+  VAR: { type: 'integer' }
 })
+
+// OK!
+EZNV.loadEnv(schema).then(env => {})
 ```
 
-To load your schema from a typescript file, import your schema and pass it directly to load. This will give you the added benefit of compile-time validation on your schema object (otherwise this only happens at runtime).
+Additionally, a helper type `Env` can be used to access the result type directly based on a schema. This will be useful if you want to override `process.env`.
 
 ```ts
-import { load } from 'eznv'
-import schema from './schema'
+  const s = EZNV.Schema({
+    VAR: { type: 'integer' }
+  })
 
-load<EnvTypes>(schema).then(env => {
-  console.log(env.SOME_STRING) // OK!
-})
+  // Env = { VAR: number }
+  type Env = EZNV.Env<typeof s>
 ```
-
-The method accepts many options to configure how loading is handled. See [Options](#Options) for details.
 
 ## Schema Properties
 
@@ -226,31 +173,31 @@ SOME_STRING="# this is not ignored" # this is ignored
 While not generally good practice, `eznv` supports overriding the value of `process.env` by setting the *override* option.
 
 ```ts
-import { load, Env } from 'eznv'
+const schema = EZNV.Schema({
+  VAR: { type: 'integer' }
+})
 
-export interface EnvTypes extends Env {
-  VAR: number
-}
-
-load<EnvTypes>({ override: true }).then(env => {
-  process.env.VAR // OK
+loadEnv(schema, { override: true }).then(env => {
+  process.env.VAR // OK, but type is wrong
 })
 ```
 
-If you want the env type to be available when accessing process.env, you can override the declared type. This is provided by [DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/fd7bea617cc47ffd252bf90a477fcf6a6b6c3ba5/types/node/index.d.ts#L438) as `ProcessEnv`.
+If you want the coorect types to be provided when accessing process.env, you can override the declared type. This is provided by [DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/fd7bea617cc47ffd252bf90a477fcf6a6b6c3ba5/types/node/index.d.ts#L438) as `ProcessEnv`.
 
 ```ts
-export interface EnvTypes extends Env {
-  VAR: number
-}
+const schema = EZNV.Schema({
+  VAR: { type: 'integer' }
+})
+
+type Env = EZNV.Env<typeof schema>
 
 declare global {
   namespace NodeJS {
-    interface ProcessEnv extends EnvTypes {}
+    interface ProcessEnv extends Env {}
   }
 }
 
-load<EnvTypes>({ override: true }).then(env => {
+loadEnv(schema, { override: true }).then(env => {
   process.env.VAR // number
 })
 ```
@@ -263,9 +210,6 @@ The following are options passable to `eznv.load`.
 |------|----|-----------|
 |`cwd`|`string`|Path to the default directory to search for your schema file and env file.<br /><br />*DEFAULTS TO `process.cwd()`*|
 |`envFile`|`string`|Path, relative to cwd or absolute, to the env file.<br /><br />*DEFAULTS TO ".env"*|
-|`envType`|`string`|Type of env file. For now this can only be 'env' but may allow additional formats in the future.<br /><br />*DEFAULTS TO "env"*|
-|`schemaFile`|`string`|Path, relateive to cwd or absolute, to the schema file.<br /><br />*DEFAULTS TO "schema.{js,json,yaml,yml}"|
-|`schemaType`|`string`|Type of schema file. This can be "js", "json", or "yaml".<br /><br />*DEFAULTS TO the file type implied by the file extension*|
 |`errorOnMissing`|`boolean`|If true, load will error if required properties in the schema are missing.<br /><br />*DEFAULTS TO `true`*|
 |`errorOnExtra`|`boolean`|If true, load will error if properties are defined in the env file which have no validator in the schema.<br /><br />*DEFAULTS TO `true`*|
 |`override`|`boolean`|If true, load will inject the resulting env object into process.env, overriding any existing values.<br /><br />*DEFAULTS TO `false`|

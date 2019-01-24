@@ -1,12 +1,10 @@
 {
   "name": "eznv",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "engines": {
     "node": ">=6.4.0"
   },
   "description": "Env Management without the fuss",
-  "main": "src",
-  "types": "src",
   "author": "Asa Jones <thinkinfractals@gmail.com> (https://github.com/codechaotic)",
   "license": "ISC",
   "keywords": [
@@ -17,8 +15,8 @@
   ],
   "scripts": {
     "build": "tsc",
-    "clean": "rimraf {test,src}/**/*{.d.ts,.d.ts.map,.js,.js.map}",
-    "lint": "tslint src/**/*.ts",
+    "clean": "rimraf {src/**/*,index}{.d.ts,.d.ts.map,.js,.js.map}",
+    "lint": "tslint index.ts src/**/*.ts",
     "compile": "pegjs --plugin ts-pegjs -o src/parse.ts src/parse.pegjs",
     "coverage": "nyc report --reporter=html && opn ./coverage/index.html",
     "report-coverage": "nyc report --reporter=text-lcov | coveralls",
@@ -41,9 +39,6 @@
       "src/**/*.spec.ts"
     ]
   },
-  "optionalDependencies": {
-    "yaml": "^1.2.1"
-  },
   "devDependencies": {
     "@types/chai": "^4.1.7",
     "@types/chai-as-promised": "^7.1.0",
@@ -51,7 +46,6 @@
     "@types/node": "^10.12.18",
     "@types/sinon": "^7.0.3",
     "@types/sinon-chai": "^3.2.2",
-    "@types/yaml": "^1.0.1",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
     "coveralls": "^3.0.2",
