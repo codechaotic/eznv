@@ -1,6 +1,6 @@
 {
   "name": "eznv",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "engines": {
     "node": ">=6.4.0"
   },
@@ -14,14 +14,16 @@
     "config"
   ],
   "scripts": {
-    "build": "tsc",
-    "clean": "rimraf {src/**/*,index}{.d.ts,.d.ts.map,.js,.js.map}",
-    "lint": "tslint index.ts src/**/*.ts",
+    "build": "rimraf dest && tsc",
+    "clean": "rimraf dest",
+    "lint": "tslint src/**/*.ts",
     "compile": "pegjs --plugin ts-pegjs -o src/parse.ts src/parse.pegjs",
     "coverage": "nyc report --reporter=html && opn ./coverage/index.html",
     "report-coverage": "nyc report --reporter=text-lcov | coveralls",
     "test": "nyc mocha --opts mocha.opts src/**/*.spec.ts"
   },
+  "types": "dest",
+  "main": "dest",
   "repository": {
     "type": "git",
     "url": "https://github.com/codechaotic/eznv"
