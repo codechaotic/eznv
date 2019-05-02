@@ -1,23 +1,7 @@
-export {
-  loadEnv,
-  Options,
-  Schema,
-  Env
-} from './src'
+export { loadEnv } from './src/loadEnv'
+export { Options } from './src/Options'
+export { Schema } from './src/Schema'
+export { Env } from './src/Env'
 
-import {
-  loadEnv as l,
-  Options as O,
-  Schema as S,
-  Env as E
-} from './src'
-
-namespace EZNV {
-  export const loadEnv = l
-  export type Options = O
-  export type Schema = S
-  export const Schema = S
-  export type Env<S extends Schema> = E<S>
-}
-
-export default EZNV
+export type Resolve<T> = T extends Promise<infer R> ? R : T
+export function Literal <T> (x: T) : T { return x }

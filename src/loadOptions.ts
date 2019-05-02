@@ -2,17 +2,8 @@ import * as assert from 'assert'
 import * as path from 'path'
 import * as fs from 'fs'
 
-import {
-  Guard,
-  Options
-} from '.'
-
-const isReadable = (file) => new Promise((resolve, reject) => {
-  fs.access(file, fs.constants.R_OK, (err) => {
-    if (err) reject(err)
-    else resolve()
-  })
-})
+import { Guard } from './Guard'
+import { Options } from './Options'
 
 export async function loadOptions (options: Options = {}): Promise<Options> {
   const opts: Options = {}
@@ -57,4 +48,13 @@ export async function loadOptions (options: Options = {}): Promise<Options> {
   }
 
   return opts
+}
+
+function isReadable (file) {
+  return new Promise((resolve, reject) => {
+    fs.access(file, fs.constants.R_OK, (err) => {
+      if (err) reject(err)
+      else resolve()
+    })
+  })
 }

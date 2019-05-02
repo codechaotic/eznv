@@ -1,16 +1,12 @@
-/* eslint-disable no-unused-vars */
+import { Schema } from './Schema'
+import { Options } from './Options'
+import { Env } from './Env'
+import { loadOptions } from './loadOptions'
+import { loadEnvFile } from './loadEnvFile'
+import { validateSchema } from './validateSchema'
+import { applySchema } from './applySchema'
 
-import {
-  Options,
-  Env,
-  Schema,
-  loadOptions,
-  loadEnvFile,
-  validateSchema,
-  applySchema
-} from '.'
-
-export async function loadEnv <S extends Schema> (schema: S, options?: Partial<Options>): Promise<Env<S>> {
+export async function loadEnv <S extends Schema> (schema: S, options: Options = {}): Promise<Env<S>> {
   const opts = await loadOptions(options)
   const raw = await loadEnvFile(opts.envFile)
 
@@ -19,8 +15,7 @@ export async function loadEnv <S extends Schema> (schema: S, options?: Partial<O
   const env = applySchema(raw, schema, opts) as Env<S>
 
   if (opts.override) {
-    Object.assign(process.env, env)
+    process.env = env as any
   }
-
   return env
 }

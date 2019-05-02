@@ -1,18 +1,15 @@
 import * as fs from 'fs'
-import * as assert from 'assert'
-import {
-  Parse,
-  parse
-} from '.'
+import { Format } from './Format'
+import { parse } from './parse'
 
-export async function loadEnvFile (envFile: string): Promise<Parse.Raw> {
+export async function loadEnvFile (envFile: string): Promise<Format.Raw> {
   let buffer = await new Promise((resolve, reject) => {
     fs.readFile(envFile, (err, buffer) => {
       err ? reject(err) : resolve(buffer)
     })
   })
 
-  const document = parse(buffer.toString()) as Parse.Document
+  const document = parse(buffer.toString()) as Format.Document
 
   const raw = {}
 

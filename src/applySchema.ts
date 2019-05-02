@@ -1,13 +1,12 @@
 import * as assert from 'assert'
-import {
-  Guard,
-  Options,
-  Parse,
-  Schema,
-  Env
-} from '.'
 
-export function applySchema (raw: Parse.Raw, schema: Schema, options: Options): Env<Schema> {
+import { Format } from './Format'
+import { Options } from './Options'
+import { Schema } from './Schema'
+import { Guard } from './Guard'
+import { Env } from './Env'
+
+export function applySchema (raw: Format.Raw, schema: Schema, options: Options): Env<Schema> {
   const env = {}
 
   for (const key in raw) {
