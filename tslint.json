@@ -3,7 +3,8 @@
   "linterOptions": {
     "exclude": [
       "src/parse.ts",
-      "src/*.d.ts"
+      "src/*.d.ts",
+      "index.d.ts"
     ]
   }
 }

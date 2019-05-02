@@ -6,13 +6,14 @@
     "target": "es6",
     "lib": ["es7"],
     "declaration": true,
-    "declarationMap": true
+    "declarationMap": true,
+    "outDir": "dest"
   },
   "include": [
-    "index.ts",
-    "src/**/*"
+    "src"
   ],
   "exclude": [
+    "**/{*,}.spec.ts",
     "node_modules"
   ]
 }

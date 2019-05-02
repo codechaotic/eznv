@@ -12,18 +12,14 @@
 npm i --save eznv
 ```
 
-### Import it into your code
-
-```ts
-import EZNV from eznv
-```
-
 ### Define a Schema
 
 EZNV uses a schema object to validate an env file and to determine the type of the resulting Env object.
 
 ```ts
-  EZNV.loadEnv({
+  import { loadEnv } from 'eznv'
+
+  loadEnv({
     VAR: { type: 'integer' }
   }).then(env => {
     env.VAR // number
@@ -42,10 +38,12 @@ const s = {
 EZNV.loadEnv(schema).then(env => {})
 ```
 
-To get around this EZNV provides a helper function `Schema` which can be used when in-line definition isn't preferred.
+To get around this EZNV provides a helper function `Literal` which can be used when in-line definition isn't preferred.
 
 ```ts
-const s = EZNV.Schema({
+import { Literal, loadEnv } from 'eznv'
+
+const s = Literal({
   VAR: { type: 'integer' }
 })
 
@@ -53,15 +51,17 @@ const s = EZNV.Schema({
 EZNV.loadEnv(schema).then(env => {})
 ```
 
-Additionally, a helper type `Env` can be used to access the result type directly based on a schema. This will be useful if you want to override `process.env`.
+Additionally, you can use the included type `Env` to access the result type directly based on a schema. This will be useful if you want to override `process.env`.
 
 ```ts
-  const s = EZNV.Schema({
-    VAR: { type: 'integer' }
-  })
+  import { Env } from 'eznv'
 
-  // Env = { VAR: number }
-  type Env = EZNV.Env<typeof s>
+  const env : Env<{
+    VAR: { type: 'integer' }
+  }
+
+  // OK
+  env.VAR
 ```
 
 ## Schema Properties
@@ -74,7 +74,7 @@ A schema is a dictionary of property validators. Each key must be a [valid varia
 |---|---|
 |`type`|Every validator has a `type` property to specify what kind of property it is validating. This will have the value of "string" for `string` properties, "number" for `number` properties, "integer" for `integer` properties, and `boolean` for boolean properties.|
 |`default`|Optionally, a validator can set a default value to use if it is missing from the env file. The type of this value must match the type of the validator.|
-|`required`|All properties are considered required unless a boolean validator property `required` is set to false. Required properties will trigger an error when missing as long as `errorOnMissing` is true in the load options. (default)|
+|`required`|All properties are considered required unless a boolean validator property `required` is set to false. Required properties will trigger an error when missing as long as `errorOnMissing` is true in the options. (default)|
 
 ### Number Validator Properties
 
@@ -173,7 +173,9 @@ SOME_STRING="# this is not ignored" # this is ignored
 While not generally good practice, `eznv` supports overriding the value of `process.env` by setting the *override* option.
 
 ```ts
-const schema = EZNV.Schema({
+import { Literal, loadEnv } from 'eznv'
+
+const schema = Literal({
   VAR: { type: 'integer' }
 })
 
@@ -185,15 +187,17 @@ loadEnv(schema, { override: true }).then(env => {
 If you want the coorect types to be provided when accessing process.env, you can override the declared type. This is provided by [DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/fd7bea617cc47ffd252bf90a477fcf6a6b6c3ba5/types/node/index.d.ts#L438) as `ProcessEnv`.
 
 ```ts
-const schema = EZNV.Schema({
+import { Liteal, Env, loadEnv } from 'eznv'
+
+const schema = Literal({
   VAR: { type: 'integer' }
 })
 
-type Env = EZNV.Env<typeof schema>
+type CustomEnv = Env<typeof schema>
 
 declare global {
   namespace NodeJS {
-    interface ProcessEnv extends Env {}
+    interface ProcessEnv extends CustomEnv {}
   }
 }
 
@@ -204,7 +208,7 @@ loadEnv(schema, { override: true }).then(env => {
 
 ## Options
 
-The following are options passable to `eznv.load`.
+The following are options passable to `eznv.loadEnv`.
 
 |option|type|description|
 |------|----|-----------|

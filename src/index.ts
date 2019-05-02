@@ -1,8 +1,7 @@
-export * from './guard'
-export * from './types'
-export * from './options'
-export * from './parse'
-export * from './loadEnvFile'
-export * from './validateSchema'
-export * from './applySchema'
-export * from './loadEnv'
+export { loadEnv } from './loadEnv'
+export { Options } from './Options'
+export { Schema } from './Schema'
+export { Env } from './Env'
+
+export type Resolve<T> = T extends Promise<infer R> ? R : T
+export function Literal <T> (x: T): T { return x }

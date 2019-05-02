@@ -40,10 +40,15 @@ Document
   = body:Body { return doc(body) }
 Body
   = lines:(
-      _ exp:Expression? _ "\n" recur:Body { return [exp].concat(recur) }
+      _ exp:Expression? _ Newline recur:Body { return [exp].concat(recur) }
     / _ exp:Expression? _ { return [exp] }
   )
   { return trim(lines) }
+
+Newline
+  = "\n"
+  / "\r"
+  / "\r\n"
 
 Expression
   = assignment:Assignment _ Comment { return assignment }

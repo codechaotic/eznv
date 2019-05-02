@@ -1,8 +1,6 @@
 import * as assert from 'assert'
-import {
-  Guard,
-  Schema
-} from '.'
+import { Guard } from './Guard'
+import { Schema } from './Schema'
 
 const VARNAME_REGEXP = /^[A-Z][A-Z0-9]*(?:_?[A-Z0-9]+)*$/
 
