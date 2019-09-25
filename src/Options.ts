@@ -3,5 +3,6 @@ export interface Options {
   envFile?: string
   errorOnMissing?: boolean
   errorOnExtra?: boolean
+  useProcessEnv?: boolean
   override?: boolean
 }

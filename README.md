@@ -210,10 +210,11 @@ loadEnv(schema, { override: true }).then(env => {
 
 The following are options passable to `eznv.loadEnv`.
 
-|option|type|description|
-|------|----|-----------|
-|`cwd`|`string`|Path to the default directory to search for your schema file and env file.<br /><br />*DEFAULTS TO `process.cwd()`*|
-|`envFile`|`string`|Path, relative to cwd or absolute, to the env file.<br /><br />*DEFAULTS TO ".env"*|
-|`errorOnMissing`|`boolean`|If true, load will error if required properties in the schema are missing.<br /><br />*DEFAULTS TO `true`*|
-|`errorOnExtra`|`boolean`|If true, load will error if properties are defined in the env file which have no validator in the schema.<br /><br />*DEFAULTS TO `true`*|
-|`override`|`boolean`|If true, load will inject the resulting env object into process.env, overriding any existing values.<br /><br />*DEFAULTS TO `false`|
+|option|type|default|description|
+|------|----|-------|-----------|
+|`cwd`|`string`|`process.cwd()`|Path to the default directory to search for your schema file and env file|
+|`envFile`|`string`|`.env`|Path, relative to cwd or absolute, to the env file|
+|`errorOnMissing`|`boolean`|`true`|If true, load will error if required properties in the schema are missing|
+|`errorOnExtra`|`boolean`|`true`|If true, load will error if properties are defined in the env file which have no validator in the schema|
+|`useProcessEnv`|`boolean`|`false`|If true, variables missing from the env file will use matching keys from the process environment|
+|`override`|`boolean`|`false`|If true, load will inject the resulting env object into process.env, overriding any existing values|

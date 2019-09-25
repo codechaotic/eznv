@@ -17,7 +17,13 @@ export function applySchema (raw: Format.Raw, schema: Schema, options: Options):
 
   for (const key in schema) {
     const property = schema[key]
-    const value = raw[key]
+    let value: string
+
+    if (Guard.isDefined(raw[key])) {
+      value = raw[key]
+    } else if (Guard.isDefined(process.env[key]) && options.useProcessEnv) {
+      value = process.env[key]
+    }
 
     if (Guard.isUndefined(value)) {
       if (Guard.isUndefined(property.required) || property.required) {
