@@ -40,6 +40,13 @@ export async function loadOptions (options: Options = {}): Promise<Options> {
     opts.errorOnExtra = true
   }
 
+  if (Guard.isDefined(options.useProcessEnv)) {
+    assert(Guard.isBool(options.useProcessEnv), `Option useProcessEnv must be a boolean`)
+    opts.useProcessEnv = options.useProcessEnv
+  } else {
+    opts.useProcessEnv = false
+  }
+
   if (Guard.isDefined(options.override)) {
     assert(Guard.isBool(options.override), `Option override must be boolean`)
     opts.override = options.override
