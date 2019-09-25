@@ -34,7 +34,7 @@ export async function loadOptions (options: Options = {}): Promise<Options> {
   }
 
   if (Guard.isDefined(options.errorOnExtra)) {
-    assert(Guard.isBool(options.errorOnMissing), `Option errorOnExtra must be boolean`)
+    assert(Guard.isBool(options.errorOnExtra), `Option errorOnExtra must be boolean`)
     opts.errorOnExtra = options.errorOnExtra
   } else {
     opts.errorOnExtra = true
