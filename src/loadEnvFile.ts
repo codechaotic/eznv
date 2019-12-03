@@ -1,13 +1,19 @@
 import * as fs from 'fs'
 import { Format } from './Format'
 import { parse } from './parse'
+import { promisify } from 'util'
+
+const access = promisify(fs.access)
+const readFile = promisify(fs.readFile)
 
 export async function loadEnvFile (envFile: string): Promise<Format.Raw> {
-  let buffer = await new Promise((resolve, reject) => {
-    fs.readFile(envFile, (err, buffer) => {
-      err ? reject(err) : resolve(buffer)
-    })
-  })
+  try {
+    await access(envFile, fs.constants.R_OK)
+  } catch (error) {
+    return null
+  }
+
+  const buffer = await readFile(envFile)
 
   const document = parse(buffer.toString()) as Format.Document
 

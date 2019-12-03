@@ -19,7 +19,7 @@ export function applySchema (raw: Format.Raw, schema: Schema, options: Options):
     const property = schema[key]
     let value: string
 
-    if (Guard.isDefined(raw[key])) {
+    if (raw && Guard.isDefined(raw[key])) {
       value = raw[key]
     } else if (Guard.isDefined(process.env[key]) && options.useProcessEnv) {
       value = process.env[key]
