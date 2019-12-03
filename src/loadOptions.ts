@@ -1,6 +1,5 @@
 import * as assert from 'assert'
 import * as path from 'path'
-import * as fs from 'fs'
 
 import { Guard } from './Guard'
 import { Options } from './Options'
@@ -15,15 +14,11 @@ export async function loadOptions (options: Options = {}): Promise<Options> {
     opts.cwd = process.cwd()
   }
 
-  await isReadable(opts.cwd)
-
   if (Guard.isDefined(options.envFile)) {
     assert(Guard.isString(options.envFile), `Option envFile must be boolean`)
     opts.envFile = path.resolve(opts.cwd, options.envFile)
-    await isReadable(opts.envFile)
   } else {
     opts.envFile = path.resolve(opts.cwd, '.env')
-    await isReadable(opts.envFile)
   }
 
   if (Guard.isDefined(options.errorOnMissing)) {
@@ -55,13 +50,4 @@ export async function loadOptions (options: Options = {}): Promise<Options> {
   }
 
   return opts
-}
-
-function isReadable (file) {
-  return new Promise((resolve, reject) => {
-    fs.access(file, fs.constants.R_OK, (err) => {
-      if (err) reject(err)
-      else resolve()
-    })
-  })
 }
