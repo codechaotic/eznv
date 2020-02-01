@@ -19,10 +19,10 @@ chai.use(chaiAsPromised)
 const expect = chai.expect
 
 describe('validateProperties', function () {
-  let validateNumber: Sinon.SinonStub<[any], any>
-  let validateString: Sinon.SinonStub<[any], any>
-  let validateInteger: Sinon.SinonStub<[any], any>
-  let validateBoolean: Sinon.SinonStub<[any], any>
+  let validateNumber: Sinon.SinonStub<any, any>
+  let validateString: Sinon.SinonStub<any, any>
+  let validateInteger: Sinon.SinonStub<any, any>
+  let validateBoolean: Sinon.SinonStub<any, any>
 
   beforeEach(function () {
     validateNumber = Sinon.stub(Number, 'validateNumber')
@@ -39,54 +39,95 @@ describe('validateProperties', function () {
   })
 
   it('validates a string definition', function () {
+    const schema = {
+      key: { type: 'string' }
+    } as any
     validateString.returns([])
-    const def = { type: 'string' } as any
-    const defs = { prop: def }
-    const errors = Module.validateProperties(defs)
-    expect(validateString).to.have.been.calledWith(def)
+    const errors = Module.validateProperties(schema)
+    expect(validateString).to.have.been.calledWith(schema.key)
     expect(errors).to.be.empty
+  })
+
+  it('errors when string validation fails', function () {
+    const schema = {
+      key: { type: 'string' }
+    } as any
+    validateString.returns(['nope'])
+    const errors = Module.validateProperties(schema)
+    expect(errors).not.to.be.empty
   })
 
   it('validates a number definition', function () {
+    const schema = {
+      key: { type: 'number' }
+    } as any
     validateNumber.returns([])
-    const def = { type: 'number' } as any
-    const defs = { prop: def }
-    const errors = Module.validateProperties(defs)
-    expect(validateNumber).to.have.been.calledWith(def)
+    const errors = Module.validateProperties(schema)
+    expect(validateNumber).to.have.been.calledWith(schema.key)
     expect(errors).to.be.empty
+  })
+
+  it('errors when number validation fails', function () {
+    const schema = {
+      key: { type: 'number' }
+    } as any
+    validateNumber.returns(['nope'])
+    const errors = Module.validateProperties(schema)
+    expect(errors).not.to.be.empty
   })
 
   it('validates an integer definition', function () {
+    const schema = {
+      key: { type: 'integer' }
+    } as any
     validateInteger.returns([])
-    const def = { type: 'integer' } as any
-    const defs = { prop: def }
-    const errors = Module.validateProperties(defs)
-    expect(validateInteger).to.have.been.calledWith(def)
+    const errors = Module.validateProperties(schema)
+    expect(validateInteger).to.have.been.calledWith(schema.key)
     expect(errors).to.be.empty
+  })
+
+  it('errors when integer validation fails', function () {
+    const schema = {
+      key: { type: 'integer' }
+    } as any
+    validateInteger.returns(['nope'])
+    const errors = Module.validateProperties(schema)
+    expect(errors).not.to.be.empty
   })
 
   it('validates a boolean definition', function () {
+    const schema = {
+      key: { type: 'boolean' }
+    } as any
     validateBoolean.returns([])
-    const def = { type: 'boolean' } as any
-    const defs = { prop: def }
-    const errors = Module.validateProperties(defs)
-    expect(validateBoolean).to.have.been.calledWith(def)
+    const errors = Module.validateProperties(schema)
+    expect(validateBoolean).to.have.been.calledWith(schema.key)
     expect(errors).to.be.empty
   })
 
+  it('errors when boolean validation fails', function () {
+    const schema = {
+      key: { type: 'boolean' }
+    } as any
+    validateBoolean.returns(['nope'])
+    const errors = Module.validateProperties(schema)
+    expect(errors).not.to.be.empty
+  })
+
   it('rejects a non-object property definition', function () {
-    const def = null as any
-    const defs = { prop: def }
-    const errors = Module.validateProperties(defs)
+    const schema = {
+      key: null
+    } as any
+    const errors = Module.validateProperties(schema)
     expect(errors).not.to.be.empty
   })
 })
 
 describe('createProperties', function () {
-  let parseNumber: Sinon.SinonStub<[any], any>
-  let parseString: Sinon.SinonStub<[any], any>
-  let parseInteger: Sinon.SinonStub<[any], any>
-  let parseBoolean: Sinon.SinonStub<[any], any>
+  let parseNumber: Sinon.SinonStub<any, any>
+  let parseString: Sinon.SinonStub<any, any>
+  let parseInteger: Sinon.SinonStub<any, any>
+  let parseBoolean: Sinon.SinonStub<any, any>
 
   beforeEach(function () {
     parseNumber = Sinon.stub(Number, 'parseNumber')
@@ -103,47 +144,35 @@ describe('createProperties', function () {
   })
 
   it('creates a string parser', function () {
-    const parser = {}
-    parseString.returns(parser)
-    const def = { type: 'string' } as any
-    const defs = { prop: def }
-    const parsers = Module.createProperties(defs)
-    expect(parseString).to.have.been.calledWith(def)
-    expect(parsers).to.be.an('object')
-    expect(parsers.prop).to.equal(parser)
+    const schema = {
+      key: { type: 'string' }
+    } as any
+    Module.createProperties(schema)
+    expect(parseString).to.have.been.calledWith(schema.key)
   })
 
   it('creates a integer parser', function () {
-    const parser = {}
-    parseInteger.returns(parser)
-    const def = { type: 'integer' } as any
-    const defs = { prop: def }
-    const parsers = Module.createProperties(defs)
-    expect(parseInteger).to.have.been.calledWith(def)
-    expect(parsers).to.be.an('object')
-    expect(parsers.prop).to.equal(parser)
+    const schema = {
+      key: { type: 'integer' }
+    } as any
+    Module.createProperties(schema)
+    expect(parseInteger).to.have.been.calledWith(schema.key)
   })
 
   it('creates a boolean parser', function () {
-    const parser = {}
-    parseBoolean.returns(parser)
-    const def = { type: 'boolean' } as any
-    const defs = { prop: def }
-    const parsers = Module.createProperties(defs)
-    expect(parseBoolean).to.have.been.calledWith(def)
-    expect(parsers).to.be.an('object')
-    expect(parsers.prop).to.equal(parser)
+    const schema = {
+      key: { type: 'boolean' }
+    } as any
+    Module.createProperties(schema)
+    expect(parseBoolean).to.have.been.calledWith(schema.key)
   })
 
   it('creates a number parser', function () {
-    const parser = {}
-    parseNumber.returns(parser)
-    const def = { type: 'number' } as any
-    const defs = { prop: def }
-    const parsers = Module.createProperties(defs)
-    expect(parseNumber).to.have.been.calledWith(def)
-    expect(parsers).to.be.an('object')
-    expect(parsers.prop).to.equal(parser)
+    const schema = {
+      key: { type: 'number' }
+    } as any
+    Module.createProperties(schema)
+    expect(parseNumber).to.have.been.calledWith(schema.key)
   })
 })
 
@@ -178,6 +207,11 @@ describe('loadEnvFile', function () {
     await Module.loadEnvFile({}, {})
     expect(readFile).to.be.calledWith('/.env')
     expect(parse).to.be.calledWith('')
+  })
+
+  it('skips loading if mode = "no_file"', async function () {
+    const result = await Module.loadEnvFile({ mode: 'no_file' }, {})
+    expect(result).to.deep.equal({})
   })
 
   it('errors when loading fails', async function () {
@@ -274,6 +308,29 @@ describe('loadEnvFile', function () {
     expect(result).to.have.property('key2', 'value')
   })
 
+  it('uses option matchCase', async function () {
+    cwd.returns('/')
+    readFile.callsArgWith(1, null, new Buffer(''))
+    parse.returns({
+      body: [{
+        lhs: 'key',
+        rhs: [{
+          type: 'Literal',
+          value: 'value'
+        }]
+      }]
+    })
+    const schema = {
+      key: { type: 'string' }
+    } as any
+    findWithSensitivity.withArgs('key', schema).returns('key')
+    await Module.loadEnvFile({ matchCase: false }, schema)
+    expect(findWithSensitivity).to.have.been.calledWith('key', schema, 'base')
+    findWithSensitivity.resetHistory()
+    await Module.loadEnvFile({ matchCase: true }, schema)
+    expect(findWithSensitivity).to.have.been.calledWith('key', schema, 'variant')
+  })
+
   it('errors with extra keys and ignoreExtra = false (default)', async function () {
     cwd.returns('/')
     readFile.callsArgWith(1, null, new Buffer(''))
@@ -366,9 +423,10 @@ describe('Schema', function () {
         key: { type: 'string' }
       })
 
-      loadEnvFile.resolves({ key: 'value' })
-      findWithSensitivity.onFirstCall().returns(undefined)
-      findWithSensitivity.onSecondCall().returns('key')
+      const file = { key: 'value' }
+      loadEnvFile.resolves(file)
+      findWithSensitivity.withArgs('key', process.env).returns(undefined)
+      findWithSensitivity.withArgs('key', file).returns('key')
       parser.withArgs('value').returns({ errors: [], value: 'value' })
       const result = await schema.load()
       expect(parser).to.have.been.calledWith('value')
@@ -485,8 +543,10 @@ describe('Schema', function () {
         key: { type: 'string' }
       })
 
-      findWithSensitivity.onFirstCall().returns(undefined)
-      findWithSensitivity.onSecondCall().returns('key')
+      const file = { key: 'value' }
+      loadEnvFile.resolves(file)
+      findWithSensitivity.withArgs('key', process.env).returns(undefined)
+      findWithSensitivity.withArgs('key', file).returns('key')
       parser.returns({ errors: ['error'] })
       loadEnvFile.resolves({ key: 'value' })
       const promise = schema.load()

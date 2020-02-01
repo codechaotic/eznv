@@ -98,11 +98,11 @@ export class Schema <S extends SchemaProperties> {
   async load (options: LoadOptions = {}): Promise<SchemaType<S>> {
     const mode = options.mode || Mode.Default
 
-    const sensitivity = options.matchCase ? 'variant' : 'base'
+    const matchCase = options.matchCase || false
+    const sensitivity = matchCase ? 'variant' : 'base'
     const useProcessEnv = [Mode.Default, Mode.NoFile].includes(mode)
 
     const file = await exports.loadEnvFile(options, this.definitions)
-
     const env = {} as any
     const errors = [] as string[][]
 
@@ -142,15 +142,15 @@ export class Schema <S extends SchemaProperties> {
 }
 
 export async function loadEnvFile (options: LoadOptions, schema: SchemaProperties) {
-  const mode = options?.mode ?? Mode.Default
+  const mode = options.mode || Mode.Default
   const load = [Mode.Default, Mode.FileOnly].includes(mode)
 
   if (!load) return {}
 
   const useProcessEnv = [Mode.Default].includes(mode)
-  const ignoreExtra = options?.ignoreExtra ?? false
-  const matchCase = options?.matchCase ?? false
-  const file = options?.file ?? '.env'
+  const ignoreExtra = options.ignoreExtra || false
+  const matchCase = options.matchCase || false
+  const file = options.file || '.env'
 
   const sensitivity = matchCase ? 'variant' : 'base'
   const filepath = path.resolve(process.cwd(), file)
@@ -164,29 +164,27 @@ export async function loadEnvFile (options: LoadOptions, schema: SchemaPropertie
   }
 
   let document: any
-  try { if (buffer) document = grammar.parse(buffer.toString()) }
+  try { document = grammar.parse(buffer.toString()) }
   catch (error) {
     throw new EZNVError(`failed to parse envFile: ${error.message}`)
   }
 
-  if (document) {
-    for (const assignment of document.body) {
-      const name = assignment.lhs
-      const values = [] as any[]
+  for (const assignment of document.body) {
+    const name = assignment.lhs
+    const values = [] as any[]
 
-      for (const segment of assignment.rhs) {
-        const { type, value } = segment
-        if (type === 'Literal') {
-          values.push(value)
-        } else if (result[value] !== undefined) {
-          values.push(result[value])
-        } else if (useProcessEnv && process.env[value] !== undefined) {
-          values.push(process.env[value])
-        } else throw new EZNVError(`failed to substitute variable "${name}": no set variable "${value}"`)
-      }
-
-      result[name] = values.join('')
+    for (const segment of assignment.rhs) {
+      const { type, value } = segment
+      if (type === 'Literal') {
+        values.push(value)
+      } else if (result[value] !== undefined) {
+        values.push(result[value])
+      } else if (useProcessEnv && process.env[value] !== undefined) {
+        values.push(process.env[value])
+      } else throw new EZNVError(`failed to substitute variable "${name}": no set variable "${value}"`)
     }
+
+    result[name] = values.join('')
   }
 
   if (!ignoreExtra) {
