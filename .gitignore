@@ -3,7 +3,7 @@ dist/
 type/
 node_modules/
 coverage/
-src/parse.ts
+src/grammar.ts
 .nyc_output/
 *.js
 *.js.map

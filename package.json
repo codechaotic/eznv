@@ -15,9 +15,9 @@
   ],
   "scripts": {
     "build": "rimraf dest types && npm run compile && tsc",
-    "clean": "rimraf dest",
+    "clean": "rimraf dest types src/grammar.ts",
     "lint": "tslint --project tsconfig.json src/**/*.ts",
-    "compile": "pegjs --plugin ts-pegjs -o src/parse.ts src/parse.pegjs",
+    "compile": "pegjs --plugin ts-pegjs -o src/grammar.ts grammar.pegjs",
     "coverage": "nyc report --reporter=html && open-cli ./coverage/index.html",
     "report-coverage": "nyc report --reporter=text-lcov | coveralls",
     "test": "npm run compile && nyc mocha --config mocharc.yml src/**/*.spec.ts",
@@ -40,6 +40,7 @@
     "exclude": [
       "src/**/*.d.ts*",
       "src/**/*.spec.ts",
+      "src/grammar.ts"
     ]
   },
   "devDependencies": {

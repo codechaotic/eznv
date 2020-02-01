@@ -118,7 +118,7 @@ VariableName "variable name"
   / word:VariableWord { return [word] }
 
 VariableWord "variable word"
-  = first:[A-Z] rest:[A-Z0-9]* { return first + rest.join('') }
+  = first:[A-Za-z] rest:[A-Za-z0-9]* { return first + rest.join('') }
 
 NoQuoteSequence
   = NoQuoteSafeCharacter
