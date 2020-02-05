@@ -14,73 +14,36 @@ npm i --save eznv
 
 ### Define a Schema
 
-EZNV uses a schema object to validate an env file and to determine the type of the resulting Env object.
+EZNV uses a schema object to validate an env file and to determine the type of the resulting object.
 
 ```ts
-  import { loadEnv } from 'eznv'
+  import EZ from 'eznv'
 
-  loadEnv({
-    VAR: { type: 'integer' }
-  }).then(env => {
-    env.VAR // number
+  const schema = EZ.Schema({
+    NUM: EZ.Number({
+      default: 0,
+      minimum: 0,
+      maximum: 10
+    })
   })
-```
-
-Note that defining the schema in-line with the function call as shown above is important for TypeScript to correctly infer the result type. Defining the schema elsewhere will cause a typing error.
-
-```ts
-const s = {
-  VAR: { type: 'integer' }
-}
-
-// ERROR Type Mismatch
-// { type: string } cannot be converted to { type: 'integer' }
-EZNV.loadEnv(schema).then(env => {})
-```
-
-To get around this EZNV provides a helper function `Literal` which can be used when in-line definition isn't preferred.
-
-```ts
-import { Literal, loadEnv } from 'eznv'
-
-const s = Literal({
-  VAR: { type: 'integer' }
-})
-
-// OK!
-EZNV.loadEnv(schema).then(env => {})
-```
-
-Additionally, you can use the included type `Env` to access the result type directly based on a schema. This will be useful if you want to override `process.env`.
-
-```ts
-  import { Env } from 'eznv'
-
-  const env : Env<{
-    VAR: { type: 'integer' }
-  }
-
-  // OK
-  env.VAR
 ```
 
 ## Schema Properties
 
-A schema is a dictionary of property validators. Each key must be a [valid variable name](#Variables) and each property must be a valid definition for a `number`, `integer`, `string`, or `boolean` validator.
+The `EZ.Schema` function takes as an argument a dictionary of property definitions. There are four different property definitions you can create. `EZ.Number`, `EZ.String`, `EZ.Integer`, and `EZ.Boolean`. Each type allows for different options to control validation.
 
 ### Common Validator Properties
 
-|Property|Description|
+|Option|Description|
 |---|---|
-|`type`|Every validator has a `type` property to specify what kind of property it is validating. This will have the value of "string" for `string` properties, "number" for `number` properties, "integer" for `integer` properties, and `boolean` for boolean properties.|
-|`default`|Optionally, a validator can set a default value to use if it is missing from the env file. The type of this value must match the type of the validator.|
-|`required`|All properties are considered required unless a boolean validator property `required` is set to false. Required properties will trigger an error when missing as long as `errorOnMissing` is true in the options. (default)|
+|`default`|A default value to use when the property is missing|
+|`required`|Should the property be required. Defaults to `true`|
 
 ### Number Validator Properties
 
-When `type` = "number" the validator will trigger the cooresponding env variable to be parsed as a number and allows the following extra properties.
+`EZ.Number` will define a number property.
 
-|Property|Description|
+|Option|Description|
 |---|---|
 |`minimum`|The value must be greater than or equal to this number.|
 |`exclusiveMinimum`|The value must be strictly greater than this number.|
@@ -89,26 +52,32 @@ When `type` = "number" the validator will trigger the cooresponding env variable
 
 ### Integer Validator Properties
 
-When `type` = "integer" the validator will trigger the cooresponding env variable to be parsed as an integer. It allows the following extra properties.
+`EZ.Integer` will define an integer property.
 
-|Property|Description|
+|Option|Description|
 |---|---|
 |`minimum`|The value must be greater than or equal to this number.|
 |`maximum`|The value must be less than or equal to this number.|
 
 ### String Validator Properties
 
-When `type` = "string" the validator will trigger the cooresponding env variable to be parsed as a string. It allows the following extra properties.
+`EZ.String` will define a string property.
 
-|Property|Description|
+|Option|Description|
 |---|---|
 |`minLength`|The value must have length greater than or equal to this number.|
 |`maxLength`|The value must have length less than or equal to this number.|
-|`pattern`|The value must match this pattern. (Interpreted with `new RegExp(pattern)`)|
+|`pattern`|The value must match this regular expression|
 
 ### Boolean Validator Properties
 
-When `type` = "boolean" the validator will trigger the cooresponding env variable to be parsed as a boolean. It must have a value of either "true" or "false", ignoring case.
+`EZ.Boolean` will define a string property.
+
+|Option|Description|
+|---|---|
+|`truthyValues`|An array of strings to consider `true`|
+|`falseyValues`|An array of strings to consider `false`|
+|`strictCase`|Should matching against truthy and falsey values consider case? Defaults to `false`|
 
 ## Env Files
 
@@ -116,7 +85,7 @@ The supported format for env files is fairly standard. Here's a quick overview.
 
 ### Variables
 
-Variable names must start with a capital letter and contain only capital letters, numbers, and underscores.
+Variable names must start with a letter and contain only letters, numbers, and underscores.
 
 ### Assignments
 
@@ -168,44 +137,6 @@ SOME_STRING="# this is not ignored" # this is ignored
 # this is also ignored
 ```
 
-## Modifying `process.env`
-
-While not generally good practice, `eznv` supports overriding the value of `process.env` by setting the *override* option.
-
-```ts
-import { Literal, loadEnv } from 'eznv'
-
-const schema = Literal({
-  VAR: { type: 'integer' }
-})
-
-loadEnv(schema, { override: true }).then(env => {
-  process.env.VAR // OK, but type is wrong
-})
-```
-
-If you want the coorect types to be provided when accessing process.env, you can override the declared type. This is provided by [DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/fd7bea617cc47ffd252bf90a477fcf6a6b6c3ba5/types/node/index.d.ts#L438) as `ProcessEnv`.
-
-```ts
-import { Liteal, Env, loadEnv } from 'eznv'
-
-const schema = Literal({
-  VAR: { type: 'integer' }
-})
-
-type CustomEnv = Env<typeof schema>
-
-declare global {
-  namespace NodeJS {
-    interface ProcessEnv extends CustomEnv {}
-  }
-}
-
-loadEnv(schema, { override: true }).then(env => {
-  process.env.VAR // number
-})
-```
-
 ## Options
 
 The following are options passable to `eznv.loadEnv`.
@@ -213,8 +144,6 @@ The following are options passable to `eznv.loadEnv`.
 |option|type|default|description|
 |------|----|-------|-----------|
 |`cwd`|`string`|`process.cwd()`|Path to the default directory to search for your schema file and env file|
-|`envFile`|`string`|`.env`|Path, relative to cwd or absolute, to the env file|
-|`errorOnMissing`|`boolean`|`true`|If true, load will error if required properties in the schema are missing|
-|`errorOnExtra`|`boolean`|`true`|If true, load will error if properties are defined in the env file which have no validator in the schema|
-|`useProcessEnv`|`boolean`|`false`|If true, variables missing from the env file will use matching keys from the process environment|
-|`override`|`boolean`|`false`|If true, load will inject the resulting env object into process.env, overriding any existing values|
+|`file`|`string`|`.env`|Path, relative to cwd or absolute, to the env file|
+|`ignoreExtra`|`boolean`|`false`|ignore unknow properties in the envFile|
+|`mode`|`default | no_file | file_only`|`default`|configure whether use the file only, process.env only, or both
