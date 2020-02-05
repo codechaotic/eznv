@@ -2,7 +2,11 @@ import { EZBoolean, EZBooleanOptions } from './EZBoolean'
 import { EZString, EZStringOptions } from './EZString'
 import { EZInteger, EZIntegerOptions } from './EZInteger'
 import { EZNumber, EZNumberOptions } from './EZNumber'
-import { EZSchema, EZProperties } from './EZSchema'
+import { EZLoadType, EZSchema, EZProperties } from './EZSchema'
+
+export default EZ
+
+export type EZ <S> = S extends EZSchema<infer U> ? EZLoadType<U> : never
 
 export namespace EZ {
   export function Schema <P extends EZProperties> (properties: P) {
@@ -41,5 +45,3 @@ export namespace EZ {
     return new EZString(options)
   }
 }
-
-export default EZ

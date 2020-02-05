@@ -48,14 +48,14 @@ export type EZPropertyType <P extends EZProperty> =
   : P extends EZString<false, false> ? string | null
   : never
 
-export type EZSchemaType <P extends EZProperties> = {
+export type EZLoadType <P extends EZProperties> = {
   [K in keyof P]: EZPropertyType<P[K]>
 }
 
 export class EZSchema <P extends EZProperties> {
   constructor (private properties: EZProperties) {}
 
-  async load (options: EZLoadOptions = {}): Promise<EZSchemaType<P>> {
+  async load (options: EZLoadOptions = {}): Promise<EZLoadType<P>> {
     const mode = options.mode || Mode.Default
 
     const useProcessEnv = [Mode.Default, Mode.NoFile].includes(mode)
