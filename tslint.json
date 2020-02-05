@@ -3,8 +3,7 @@
   "linterOptions": {
     "exclude": [
       "src/grammar.ts",
-      "src/*.d.ts",
-      "index.d.ts"
+      "src/*.d.ts"
     ]
   }
 }
