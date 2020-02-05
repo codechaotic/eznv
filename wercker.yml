@@ -21,8 +21,7 @@ coverage:
     - script:
       name: coverage
       code: |
-        # npm run report-coverage
-        echo Broken for now
+        npm run report-coverage
 
 release:
   box: node
