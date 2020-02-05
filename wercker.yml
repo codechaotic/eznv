@@ -1,5 +1,5 @@
 test:
-  box: node:6.4.0
+  box: node
   steps:
     - npm-install
     - script:
@@ -11,7 +11,7 @@ test:
       code: npm run lint
 
 coverage:
-  box: node:6.4.0
+  box: node
   steps:
     - npm-install
     - script:
@@ -25,7 +25,7 @@ coverage:
         echo Broken for now
 
 release:
-  box: node:6.4.0
+  box: node
   steps:
     - npm-install
     - script:
