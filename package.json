@@ -20,8 +20,7 @@
     "compile": "pegjs --plugin ts-pegjs -o src/grammar.ts grammar.pegjs",
     "coverage": "nyc report --reporter=html && open-cli ./coverage/index.html",
     "report-coverage": "nyc report --reporter=text-lcov | coveralls",
-    "test": "npm run compile && nyc mocha --config mocharc.yml src/**/*.spec.ts",
-    "ex": "ts-node example.ts"
+    "test": "npm run compile && nyc mocha --config mocharc.yml src/**/*.spec.ts"
   },
   "types": "types",
   "main": "dist",
