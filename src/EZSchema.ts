@@ -72,32 +72,36 @@ export class EZSchema <P extends EZProperties> {
       try {
         buffer = await promisify(fs.readFile)(filepath)
       } catch (error) {
-        throw new EZLoaderError(`failed to load envFile: ${error.message}`)
+        if (mode === Mode.FileOnly) {
+          throw new EZLoaderError(`failed to load envFile: ${error.message}`)
+        }
       }
 
       let document: any
       try {
-        document = grammar.parse(buffer.toString())
+        if (buffer) document = grammar.parse(buffer.toString())
       } catch (error) {
         throw new EZLoaderError(`failed to parse envFile: ${error.message}`)
       }
 
-      for (const assignment of document.body) {
-        const name = assignment.lhs
-        const values = [] as any[]
+      if (document) {
+        for (const assignment of document.body) {
+          const name = assignment.lhs
+          const values = [] as any[]
 
-        for (const segment of assignment.rhs) {
-          const { type, value } = segment
-          if (type === 'Literal') {
-            values.push(value)
-          } else if (fileResult[value] !== undefined) {
-            values.push(fileResult[value])
-          } else if (useProcessEnv && process.env[value] !== undefined) {
-            values.push(process.env[value])
-          } else throw new EZLoaderError(`failed to substitute variable "${name}": no set variable "${value}"`)
+          for (const segment of assignment.rhs) {
+            const { type, value } = segment
+            if (type === 'Literal') {
+              values.push(value)
+            } else if (fileResult[value] !== undefined) {
+              values.push(fileResult[value])
+            } else if (useProcessEnv && process.env[value] !== undefined) {
+              values.push(process.env[value])
+            } else throw new EZLoaderError(`failed to substitute variable "${name}": no set variable "${value}"`)
+          }
+
+          fileResult[name] = values.join('')
         }
-
-        fileResult[name] = values.join('')
       }
 
       if (!ignoreExtra) {
@@ -140,7 +144,7 @@ export class EZSchema <P extends EZProperties> {
         if (property.default !== null) {
           env[name] = property.default
         } else if (property.required === true) {
-          throw new EZLoaderError('property ${name} is required')
+          throw new EZLoaderError(`property "${name}" is required`)
         } else env[name] = null
       } else env[name] = property.parse(value)
     }
@@ -148,10 +152,3 @@ export class EZSchema <P extends EZProperties> {
     return env
   }
 }
-
-// export function findWithSensitivity (value: string, source: object, sensitivity: string) {
-//   for (const key in source) {
-//     if (value.localeCompare(key, undefined, { sensitivity })) continue
-//     return key
-//   }
-// }

@@ -1,4 +1,4 @@
-/* tslint:disable:no-unused-expression no-empty */
+/* tslint:disable:no-unused-expression no-empty await-promise */
 
 import * as fs from 'fs'
 import * as chai from 'chai'
@@ -42,7 +42,7 @@ describe('EZSchema', function () {
       properties = {}
       process.env = {}
       readFile = Sinon.stub(fs, 'readFile')
-      readFile.callsArgWith(1, null, new Buffer('FAKE'))
+      readFile.callsArgWith(1, null, Buffer.from('FAKE'))
       cwd = Sinon.stub(process, 'cwd').returns('/')
       parseFile = Sinon.stub(grammar, 'parse')
       parseFile.returns(document)
@@ -68,9 +68,14 @@ describe('EZSchema', function () {
       expect(parseFile).not.to.be.called
     })
 
-    it('errors when loading fails', async function () {
+    it('errors when loading fails and mode = "file_only"', async function () {
       readFile.callsArgWith(1, new Error(), null)
-      await expect(new EZSchema().load({})).to.be.rejectedWith(EZLoaderError)
+      await expect(new EZSchema().load({ mode: 'file_only' })).to.be.rejectedWith(EZLoaderError)
+    })
+
+    it('skips loading when loading fails and mode = "default"', async function () {
+      readFile.callsArgWith(1, new Error(), null)
+      await expect(new EZSchema().load({ mode: 'default' })).not.to.be.rejected
     })
 
     it('errors when parsing fails', async function () {
@@ -189,210 +194,3 @@ describe('EZSchema', function () {
     })
   })
 })
-
-// describe('loadEnvFile', function () {
-
-// describe('Schema', function () {
-//   let validateProperties: Sinon.SinonStub<any, any>
-//   let createProperties: Sinon.SinonStub<any, any>
-
-//   beforeEach(function () {
-//     validateProperties = Sinon.stub(Module, 'validateProperties')
-//     createProperties = Sinon.stub(Module, 'createProperties')
-//   })
-
-//   afterEach(function () {
-//     validateProperties.restore()
-//     createProperties.restore()
-//   })
-
-//   describe('constructor', function () {
-//     it('validates schema and generates parsers', function () {
-//       validateProperties.returns([])
-//       createProperties.returns({})
-//       const schema = { key: { type: 'string' } } as any
-//       new Module.Schema(schema)
-//       expect(validateProperties).to.have.been.calledWith(schema)
-//       expect(createProperties).to.have.been.calledWith(schema)
-//     })
-
-//     it('errors if definition fails validation', function () {
-//       validateProperties.returns([['fake','prop','sucks']])
-//       expect(() => new Module.Schema({})).to.throw(Module.EZNVError)
-//     })
-//   })
-
-//   describe('load', function () {
-//     let loadEnvFile: Sinon.SinonStub<any, any>
-//     let findWithSensitivity: Sinon.SinonStub<any, any>
-//     let parser: Sinon.SinonStub<any, any>
-//     let env = process.env
-
-//     beforeEach(function () {
-//       loadEnvFile = Sinon.stub(Module, 'loadEnvFile')
-//       findWithSensitivity = Sinon.stub(Module, 'findWithSensitivity')
-//       parser = Sinon.stub()
-//       process.env = { FAKE: 'value' }
-//     })
-
-//     afterEach(function () {
-//       loadEnvFile.restore()
-//       findWithSensitivity.restore()
-//       process.env = env
-//     })
-
-//     it('uses options matchCase', async function () {
-//       validateProperties.returns([])
-//       createProperties.returns({ key: parser })
-//       const schema = new Module.Schema({
-//         key: { type: 'string', required: false }
-//       })
-
-//       const file = { key: 'value' }
-//       loadEnvFile.resolves(file)
-//       await schema.load({ matchCase: false })
-//       expect(findWithSensitivity).to.have.been.calledWith('key', file, 'base')
-//       findWithSensitivity.reset()
-//       await schema.load({ matchCase: true })
-//       expect(findWithSensitivity).to.have.been.calledWith('key', file, 'variant')
-//     })
-
-//     it('uses process.env when mode = "default"', async function () {
-//       validateProperties.returns([])
-//       createProperties.returns({ key: parser })
-//       const schema = new Module.Schema({
-//         key: { type: 'string', required: false }
-//       })
-
-//       const file = {}
-//       loadEnvFile.resolves(file)
-//       process.env.KEY = 'value'
-//       parser.withArgs('value').returns({ errors: [], value: 'value' })
-//       findWithSensitivity.withArgs('key', process.env).returns('KEY')
-//       findWithSensitivity.withArgs('key', file).returns(undefined)
-//       const result = await schema.load({ mode: 'default' })
-//       expect(result).to.have.property('key', 'value')
-//     })
-
-//     it('uses process.env when mode = "no_file"', async function () {
-//       validateProperties.returns([])
-//       createProperties.returns({ key: parser })
-//       const schema = new Module.Schema({
-//         key: { type: 'string', required: false }
-//       })
-
-//       const file = {}
-//       loadEnvFile.resolves(file)
-//       process.env.KEY = 'value'
-//       parser.withArgs('value').returns({ errors: [], value: 'value' })
-//       findWithSensitivity.withArgs('key', process.env).returns('KEY')
-//       findWithSensitivity.withArgs('key', file).returns(undefined)
-//       const result = await schema.load({ mode: 'no_file' })
-//       expect(result).to.have.property('key', 'value')
-//     })
-
-//     it('ignores process.env when mode = "file_only"', async function () {
-//       validateProperties.returns([])
-//       createProperties.returns({ key: parser })
-//       const schema = new Module.Schema({
-//         key: { type: 'string', required: false }
-//       })
-
-//       const file = {}
-//       loadEnvFile.resolves(file)
-//       process.env.KEY = 'value'
-//       parser.withArgs('value').returns({ errors: [], value: 'value' })
-//       findWithSensitivity.withArgs('key', process.env).returns('KEY')
-//       findWithSensitivity.withArgs('key', file).returns(undefined)
-//       const result = await schema.load({ mode: 'file_only' })
-//       expect(result).to.have.property('key', null)
-//     })
-
-//     it('uses null when non-required properties are missing', async function () {
-//       validateProperties.returns([])
-//       createProperties.returns({ key: parser })
-//       const schema = new Module.Schema({
-//         key: { type: 'string', required: false }
-//       })
-
-//       loadEnvFile.resolves({})
-//       const result = await schema.load()
-//       expect(result).to.have.property('key', null)
-//     })
-
-//     it('errors when required properties are missing', async function () {
-//       validateProperties.returns([])
-//       createProperties.returns({ key: parser })
-//       const schema = new Module.Schema({
-//         key: { type: 'string' }
-//       })
-
-//       loadEnvFile.resolves({})
-//       const promise = schema.load()
-//       await expect(promise).to.be.rejected
-//     })
-
-//     it('uses default when provided and properties are missing', async function () {
-//       validateProperties.returns([])
-//       createProperties.returns({ key: parser })
-//       const schema = new Module.Schema({
-//         key: { type: 'string', default: 'value' }
-//       })
-
-//       loadEnvFile.resolves({})
-//       const result = await schema.load()
-//       await expect(result).to.have.property('key', 'value')
-//     })
-
-//     it('errors when parsing fails', async function () {
-//       validateProperties.returns([])
-//       createProperties.returns({ key: parser })
-//       const schema = new Module.Schema({
-//         key: { type: 'string' }
-//       })
-
-//       const file = { key: 'value' }
-//       loadEnvFile.resolves(file)
-//       findWithSensitivity.withArgs('key', process.env).returns(undefined)
-//       findWithSensitivity.withArgs('key', file).returns('key')
-//       parser.returns({ errors: ['error'] })
-//       loadEnvFile.resolves({ key: 'value' })
-//       const promise = schema.load()
-//       await expect(promise).to.be.rejected
-//     })
-//   })
-// })
-
-// describe('combineErrors', function () {
-//   it ('combines a single error', function () {
-//     const message = Module.combineErrors('main', [['name','type','message']])
-//     expect(message).to.equal('main\n\ttype property name message')
-//   })
-
-//   it ('combines a multiple errors for the same property', function () {
-//     const message = Module.combineErrors('main', [
-//       ['name','type','message1', 'message2']
-//     ])
-//     expect(message).to.equal('main\n\ttype property name:\n\tmessage1\n\tmessage2')
-//   })
-
-//   it ('combines a multiple errors for different properties', function () {
-//     const message = Module.combineErrors('main', [
-//       ['name1','type','message'],
-//       ['name2','type','message']
-//     ])
-//     expect(message).to.equal('main\n\ttype property name1 message\n\n\ttype property name2 message')
-//   })
-// })
-
-// describe('findWithSensitivity', function () {
-//   it('finds a string using given sensitivity', function () {
-//     let match: string | undefined
-//     match = Module.findWithSensitivity('value', { value: null }, 'variant')
-//     expect(match).to.equal('value')
-//     match = Module.findWithSensitivity('value', { VALUE: null }, 'variant')
-//     expect(match).to.be.undefined
-//     match = Module.findWithSensitivity('value', { VALUE: null }, 'base')
-//     expect(match).to.equal('VALUE')
-//   })
-// })

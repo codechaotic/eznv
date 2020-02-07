@@ -4,11 +4,9 @@ import { EZInteger, EZIntegerOptions } from './EZInteger'
 import { EZNumber, EZNumberOptions } from './EZNumber'
 import { EZLoadType, EZSchema, EZProperties } from './EZSchema'
 
-export default EZ
-
-export type EZ <S> = S extends EZSchema<infer U> ? EZLoadType<U> : never
-
 export namespace EZ {
+  export type LoadType <S extends EZSchema<any>> = S extends EZSchema<infer U> ? EZLoadType<U> : never
+
   export function Schema <P extends EZProperties> (properties: P) {
     return new EZSchema<P>(properties)
   }
@@ -45,3 +43,5 @@ export namespace EZ {
     return new EZString(options)
   }
 }
+
+export default EZ
