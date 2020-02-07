@@ -73,9 +73,9 @@ describe('EZSchema', function () {
       await expect(new EZSchema().load({ mode: 'file_only' })).to.be.rejectedWith(EZLoaderError)
     })
 
-    it('skips loading when loading fails and mode = "default"', async function () {
+    it('skips loading when loading fails and mode = "file_first"', async function () {
       readFile.callsArgWith(1, new Error(), null)
-      await expect(new EZSchema().load({ mode: 'default' })).not.to.be.rejected
+      await expect(new EZSchema().load({ mode: 'file_first' })).not.to.be.rejected
     })
 
     it('errors when parsing fails', async function () {
@@ -144,7 +144,7 @@ describe('EZSchema', function () {
       properties.KEY = { type: 'string', default: null, required: true, parse: parseString }
       process.env.KEY = 'RES'
       expect(await new EZSchema(properties).load({ mode: 'no_file' })).to.have.property('KEY', 'RES')
-      expect(await new EZSchema(properties).load({ mode: 'default' })).to.have.property('KEY', 'RES')
+      expect(await new EZSchema(properties).load({ mode: 'file_first' })).to.have.property('KEY', 'RES')
       await expect(new EZSchema(properties).load({ mode: 'file_only' })).to.be.rejectedWith(EZLoaderError)
     })
 
@@ -164,18 +164,6 @@ describe('EZSchema', function () {
       process.env.key = 'RES'
       expect(await new EZSchema(properties).load({ matchCase: false })).to.have.property('KEY', 'RES')
       await expect(new EZSchema(properties).load({ matchCase: true })).to.be.rejectedWith(EZLoaderError)
-    })
-
-    it('uses ignoreExtra', async function () {
-      document.body.push({
-        lhs: 'KEY',
-        rhs: [{
-          type: 'Literal',
-          value: 'RES'
-        }]
-      })
-      expect(await new EZSchema(properties).load({ ignoreExtra: true })).to.deep.equal({})
-      await expect(new EZSchema(properties).load({ ignoreExtra: false })).to.be.rejectedWith(EZLoaderError)
     })
 
     it('defaults to null when a property is not required', async function () {
