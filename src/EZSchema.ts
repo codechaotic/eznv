@@ -152,10 +152,3 @@ export class EZSchema <P extends EZProperties> {
     return env
   }
 }
-
-// export function findWithSensitivity (value: string, source: object, sensitivity: string) {
-//   for (const key in source) {
-//     if (value.localeCompare(key, undefined, { sensitivity })) continue
-//     return key
-//   }
-// }
