@@ -10,7 +10,7 @@ import { EZNumber } from './EZNumber'
 import { EZBoolean } from './EZBoolean'
 
 const Mode = {
-  Default: 'default',
+  FileFirst: 'file_first',
   FileOnly: 'file_only',
   NoFile: 'no_file'
 }
@@ -55,10 +55,10 @@ export class EZSchema <P extends EZProperties> {
   constructor (private properties: EZProperties) {}
 
   async load (options: EZLoadOptions = {}): Promise<EZLoadType<P>> {
-    const mode = options.mode || Mode.Default
+    const mode = options.mode || Mode.FileFirst
 
-    const useProcessEnv = [Mode.Default, Mode.NoFile].includes(mode)
-    const loadFile = [Mode.Default, Mode.FileOnly].includes(mode)
+    const useProcessEnv = [Mode.FileFirst, Mode.NoFile].includes(mode)
+    const loadFile = [Mode.FileFirst, Mode.FileOnly].includes(mode)
     const matchCase = options.matchCase || false
     const sensitivity = matchCase ? 'variant' : 'base'
     const file = options.file || '.env'
