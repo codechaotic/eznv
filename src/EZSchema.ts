@@ -10,7 +10,7 @@ import { EZNumber } from './EZNumber'
 import { EZBoolean } from './EZBoolean'
 
 const Mode = {
-  Default: 'default',
+  FileFirst: 'file_first',
   FileOnly: 'file_only',
   NoFile: 'no_file'
 }
@@ -18,9 +18,8 @@ const Mode = {
 export interface EZLoadOptions {
   cwd?: string
   file?: string | null
-  mode?: 'default' | 'file_only' | 'no_file'
+  mode?: 'file_first' | 'file_only' | 'no_file'
   matchCase?: boolean
-  ignoreExtra?: boolean
 }
 
 export type EZProperty
@@ -56,11 +55,10 @@ export class EZSchema <P extends EZProperties> {
   constructor (private properties: EZProperties) {}
 
   async load (options: EZLoadOptions = {}): Promise<EZLoadType<P>> {
-    const mode = options.mode || Mode.Default
+    const mode = options.mode || Mode.FileFirst
 
-    const useProcessEnv = [Mode.Default, Mode.NoFile].includes(mode)
-    const loadFile = [Mode.Default, Mode.FileOnly].includes(mode)
-    const ignoreExtra = options.ignoreExtra || false
+    const useProcessEnv = [Mode.FileFirst, Mode.NoFile].includes(mode)
+    const loadFile = [Mode.FileFirst, Mode.FileOnly].includes(mode)
     const matchCase = options.matchCase || false
     const sensitivity = matchCase ? 'variant' : 'base'
     const file = options.file || '.env'
@@ -104,21 +102,19 @@ export class EZSchema <P extends EZProperties> {
         }
       }
 
-      if (!ignoreExtra) {
-        const extra: string[] = []
+      const extra: string[] = []
 
-        for (const key in fileResult) {
-          let match = false
-          for (const name in this.properties) {
-            if (name.localeCompare(key, undefined, { sensitivity })) continue
-            match = true
-          }
-          if (!match) extra.push(key)
+      for (const key in fileResult) {
+        let match = false
+        for (const name in this.properties) {
+          if (name.localeCompare(key, undefined, { sensitivity })) continue
+          match = true
         }
+        if (!match) extra.push(key)
+      }
 
-        if (extra.length > 0) {
-          throw new EZLoaderError(`Unrecognized properties ${extra}`)
-        }
+      if (extra.length > 0) {
+        throw new EZLoaderError(`Unrecognized properties ${extra}`)
       }
     }
 
