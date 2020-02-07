@@ -1,4 +1,4 @@
-/* tslint:disable:no-unused-expression no-empty */
+/* tslint:disable:no-unused-expression no-empty await-promise */
 
 import * as fs from 'fs'
 import * as chai from 'chai'
@@ -42,7 +42,7 @@ describe('EZSchema', function () {
       properties = {}
       process.env = {}
       readFile = Sinon.stub(fs, 'readFile')
-      readFile.callsArgWith(1, null, new Buffer('FAKE'))
+      readFile.callsArgWith(1, null, Buffer.from('FAKE'))
       cwd = Sinon.stub(process, 'cwd').returns('/')
       parseFile = Sinon.stub(grammar, 'parse')
       parseFile.returns(document)

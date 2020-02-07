@@ -41,7 +41,6 @@ describe('EZNumber', function () {
       expect(() => new EZNumber({ required: {} })).to.throw(EZSchemaError)
     })
 
-
     it('accepts a number property "minimum"', function () {
       expect(() => new EZNumber({ minimum: 0 })).not.to.throw()
       expect(() => new EZNumber({ minimum: null })).not.to.throw()
