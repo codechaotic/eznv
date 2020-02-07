@@ -20,7 +20,6 @@ export interface EZLoadOptions {
   file?: string | null
   mode?: 'default' | 'file_only' | 'no_file'
   matchCase?: boolean
-  ignoreExtra?: boolean
 }
 
 export type EZProperty
@@ -60,7 +59,6 @@ export class EZSchema <P extends EZProperties> {
 
     const useProcessEnv = [Mode.Default, Mode.NoFile].includes(mode)
     const loadFile = [Mode.Default, Mode.FileOnly].includes(mode)
-    const ignoreExtra = options.ignoreExtra || false
     const matchCase = options.matchCase || false
     const sensitivity = matchCase ? 'variant' : 'base'
     const file = options.file || '.env'
@@ -104,21 +102,19 @@ export class EZSchema <P extends EZProperties> {
         }
       }
 
-      if (!ignoreExtra) {
-        const extra: string[] = []
+      const extra: string[] = []
 
-        for (const key in fileResult) {
-          let match = false
-          for (const name in this.properties) {
-            if (name.localeCompare(key, undefined, { sensitivity })) continue
-            match = true
-          }
-          if (!match) extra.push(key)
+      for (const key in fileResult) {
+        let match = false
+        for (const name in this.properties) {
+          if (name.localeCompare(key, undefined, { sensitivity })) continue
+          match = true
         }
+        if (!match) extra.push(key)
+      }
 
-        if (extra.length > 0) {
-          throw new EZLoaderError(`Unrecognized properties ${extra}`)
-        }
+      if (extra.length > 0) {
+        throw new EZLoaderError(`Unrecognized properties ${extra}`)
       }
     }
 
