@@ -1,67 +1,67 @@
 {
-  "name": "eznv",
-  "version": "1.0.0",
-  "description": "Env Management without the fuss",
-  "author": "Asa Jones <thinkinfractals@gmail.com> (https://github.com/codechaotic)",
-  "license": "ISC",
-  "keywords": [
-    "env",
-    "environment",
-    "dotenv",
-    "config"
-  ],
-  "scripts": {
-    "build": "rimraf dest types && npm run compile && tsc",
-    "clean": "rimraf dest types src/grammar.ts",
-    "lint": "tslint --project tsconfig.json src/**/*.ts",
-    "compile": "pegjs --plugin ts-pegjs -o src/grammar.ts grammar.pegjs",
-    "coverage": "nyc report --reporter=html && open-cli ./coverage/index.html",
-    "report-coverage": "nyc report --reporter=text-lcov | coveralls",
-    "test": "npm run compile && nyc mocha --config mocharc.yml src/**/*.spec.ts"
-  },
-  "types": "types",
-  "main": "dist",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/codechaotic/eznv"
-  },
-  "bugs": {
-    "url": "https://github.com/codechaotic/eznv/issues"
-  },
-  "nyc": {
-    "extension": [
-      ".ts",
-      ".tsx"
-    ],
-    "exclude": [
-      "src/**/*.d.ts*",
-      "src/**/*.spec.ts",
-      "src/grammar.ts"
-    ]
-  },
-  "devDependencies": {
-    "@types/chai": "^4.2.6",
-    "@types/chai-as-promised": "^7.1.2",
-    "@types/mocha": "^5.2.7",
-    "@types/node": "^10.17.6",
-    "@types/sinon": "^7.5.1",
-    "@types/sinon-chai": "^3.2.3",
-    "chai": "^4.2.0",
-    "chai-as-promised": "^7.1.1",
-    "coveralls": "^3.0.9",
-    "mocha": "^7.0.0",
-    "mocha-lcov-reporter": "^1.3.0",
-    "nyc": "^15.0.0",
-    "open-cli": "^5.0.0",
-    "pegjs": "^0.10.0",
-    "rimraf": "^3.0.0",
-    "sinon": "^7.5.0",
-    "sinon-chai": "^3.3.0",
-    "source-map-support": "^0.5.16",
-    "ts-node": "^8.5.4",
-    "ts-pegjs": "^0.2.6",
-    "tslint": "^5.20.1",
-    "tslint-config-standard": "^9.0.0",
-    "typescript": "^3.7.5"
-  }
+	"author": "Asa Jones <thinkinfractals@gmail.com> (https://github.com/codechaotic)",
+	"bugs": {
+		"url": "https://github.com/codechaotic/eznv/issues"
+	},
+	"description": "Env Management without the fuss",
+	"devDependencies": {
+		"@types/chai": "^4.2.6",
+		"@types/chai-as-promised": "^7.1.2",
+		"@types/mocha": "^5.2.7",
+		"@types/node": "^10.17.6",
+		"@types/sinon": "^7.5.1",
+		"@types/sinon-chai": "^3.2.3",
+		"chai": "^4.2.0",
+		"chai-as-promised": "^7.1.1",
+		"coveralls": "^3.0.9",
+		"mocha": "^7.0.0",
+		"mocha-lcov-reporter": "^1.3.0",
+		"nyc": "^15.0.0",
+		"open-cli": "^5.0.0",
+		"pegjs": "^0.10.0",
+		"rimraf": "^3.0.0",
+		"sinon": "^7.5.0",
+		"sinon-chai": "^3.3.0",
+		"source-map-support": "^0.5.16",
+		"ts-node": "^8.5.4",
+		"ts-pegjs": "^0.2.6",
+		"tslint": "^5.20.1",
+		"tslint-config-standard": "^9.0.0",
+		"typescript": "^3.7.5"
+	},
+	"keywords": [
+		"env",
+		"environment",
+		"dotenv",
+		"config"
+	],
+	"license": "ISC",
+	"main": "dist",
+	"name": "eznv",
+	"nyc": {
+		"extension": [
+			".ts",
+			".tsx"
+		],
+		"exclude": [
+			"src/**/*.d.ts*",
+			"src/**/*.spec.ts",
+			"src/grammar.ts"
+		]
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/codechaotic/eznv"
+	},
+	"scripts": {
+		"build": "rimraf dest types && npm run compile && tsc",
+		"clean": "rimraf dest types src/grammar.ts",
+		"lint": "tslint --project tsconfig.json src/**/*.ts",
+		"compile": "pegjs --plugin ts-pegjs -o src/grammar.ts grammar.pegjs",
+		"coverage": "nyc report --reporter=html && open-cli ./coverage/index.html",
+		"report-coverage": "nyc report --reporter=text-lcov | coveralls",
+		"test": "npm run compile && nyc mocha --config mocharc.yml src/**/*.spec.ts"
+	},
+	"types": "types",
+	"version": "1.0.0"
 }
