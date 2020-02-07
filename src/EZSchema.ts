@@ -18,7 +18,7 @@ const Mode = {
 export interface EZLoadOptions {
   cwd?: string
   file?: string | null
-  mode?: 'default' | 'file_only' | 'no_file'
+  mode?: 'file_first' | 'file_only' | 'no_file'
   matchCase?: boolean
 }
 
