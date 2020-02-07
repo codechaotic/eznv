@@ -68,9 +68,14 @@ describe('EZSchema', function () {
       expect(parseFile).not.to.be.called
     })
 
-    it('errors when loading fails', async function () {
+    it('errors when loading fails and mode = "file_only"', async function () {
       readFile.callsArgWith(1, new Error(), null)
-      await expect(new EZSchema().load({})).to.be.rejectedWith(EZLoaderError)
+      await expect(new EZSchema().load({ mode: 'file_only' })).to.be.rejectedWith(EZLoaderError)
+    })
+
+    it('skips loading when loading fails and mode = "default"', async function () {
+      readFile.callsArgWith(1, new Error(), null)
+      await expect(new EZSchema().load({ mode: 'default' })).not.to.be.rejected
     })
 
     it('errors when parsing fails', async function () {
