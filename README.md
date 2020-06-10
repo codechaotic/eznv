@@ -28,6 +28,28 @@ EZNV uses a schema object to validate an env file and to determine the type of t
   })
 ```
 
+### Load the ENV
+
+```ts
+  const config = await schema.load()
+
+  // or to load synchronously
+
+  const config = schema.loadSync()
+```
+
+## Load Options
+
+The following are options passable to `schema.load` and `schema.loadSync`.
+
+|option|type|default|description|
+|------|----|-------|-----------|
+|`cwd`|`string`|`process.cwd()`|Path to the default directory to search for your schema file and env file|
+|`file`|`string`|`.env`|Path, relative to cwd or absolute, to the env file|
+|`mode`|`file_first | no_file | file_only`|`file_first`|configure whether use the file only, process.env only, or both
+|`matchCase`|`boolean`|`false`|use exact case matching for variable names. Ignores case by default. |
+
+
 ## Schema Properties
 
 The `EZ.Schema` function takes as an argument a dictionary of property definitions. There are four different property definitions you can create. `EZ.Number`, `EZ.String`, `EZ.Integer`, and `EZ.Boolean`. Each type allows for different options to control validation.
@@ -136,14 +158,3 @@ SOME_STRING="# this is not ignored" # this is ignored
 
 # this is also ignored
 ```
-
-## Options
-
-The following are options passable to `eznv.loadEnv`.
-
-|option|type|default|description|
-|------|----|-------|-----------|
-|`cwd`|`string`|`process.cwd()`|Path to the default directory to search for your schema file and env file|
-|`file`|`string`|`.env`|Path, relative to cwd or absolute, to the env file|
-|`mode`|`file_first | no_file | file_only`|`file_first`|configure whether use the file only, process.env only, or both
-|`matchCase`|`boolean`|`false`|use exact case matching for variable names. Ignores case by default. |
