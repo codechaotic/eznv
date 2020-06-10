@@ -1,7 +1,6 @@
 import * as fs from 'fs'
 import * as path from 'path'
 import * as grammar from './grammar'
-import { promisify } from 'util'
 
 import { EZLoaderError } from './EZError'
 import { EZString } from './EZString'
@@ -13,13 +12,24 @@ const Mode = {
   FileFirst: 'file_first',
   FileOnly: 'file_only',
   NoFile: 'no_file'
-}
+} as const
+
+const Sensitivity = {
+  Variant: 'variant',
+  Base: 'base'
+} as const
 
 export interface EZLoadOptions {
   cwd?: string
   file?: string | null
   mode?: 'file_first' | 'file_only' | 'no_file'
   matchCase?: boolean
+}
+
+export interface EZParsedLoadOptions {
+  mode: 'file_first' | 'file_only' | 'no_file'
+  sensitivity: 'variant' | 'base'
+  filepath: string
 }
 
 export type EZProperty
@@ -54,97 +64,154 @@ export type EZLoadType <P extends EZProperties> = {
 export class EZSchema <P extends EZProperties> {
   constructor (private properties: EZProperties) {}
 
-  async load (options: EZLoadOptions = {}): Promise<EZLoadType<P>> {
-    const mode = options.mode || Mode.FileFirst
-
-    const useProcessEnv = [Mode.FileFirst, Mode.NoFile].includes(mode)
-    const loadFile = [Mode.FileFirst, Mode.FileOnly].includes(mode)
-    const matchCase = options.matchCase || false
-    const sensitivity = matchCase ? 'variant' : 'base'
-    const file = options.file || '.env'
-    const filepath = path.resolve(process.cwd(), file)
-    const fileResult = {} as any
-
-    if (loadFile) {
-      let buffer!: Buffer
-      try {
-        buffer = await promisify(fs.readFile)(filepath)
-      } catch (error) {
-        if (mode === Mode.FileOnly) {
-          throw new EZLoaderError(`failed to load envFile: ${error.message}`)
-        }
-      }
-
-      let document: any
-      try {
-        if (buffer) document = grammar.parse(buffer.toString())
-      } catch (error) {
-        throw new EZLoaderError(`failed to parse envFile: ${error.message}`)
-      }
-
-      if (document) {
-        for (const assignment of document.body) {
-          const name = assignment.lhs
-          const values = [] as any[]
-
-          for (const segment of assignment.rhs) {
-            const { type, value } = segment
-            if (type === 'Literal') {
-              values.push(value)
-            } else if (fileResult[value] !== undefined) {
-              values.push(fileResult[value])
-            } else if (useProcessEnv && process.env[value] !== undefined) {
-              values.push(process.env[value])
-            } else throw new EZLoaderError(`failed to substitute variable "${name}": no set variable "${value}"`)
-          }
-
-          fileResult[name] = values.join('')
-        }
-      }
-
-      const extra: string[] = []
-
-      for (const key in fileResult) {
-        let match = false
-        for (const name in this.properties) {
-          if (name.localeCompare(key, undefined, { sensitivity })) continue
-          match = true
-        }
-        if (!match) extra.push(key)
-      }
-
-      if (extra.length > 0) {
-        throw new EZLoaderError(`Unrecognized properties ${extra}`)
-      }
+  private parseLoadOptions (options: EZLoadOptions): EZParsedLoadOptions {
+    return {
+      mode: options?.mode ?? Mode.FileFirst,
+      sensitivity: options?.matchCase ? Sensitivity.Variant : Sensitivity.Base,
+      filepath: path.resolve(options?.cwd ?? process.cwd(), options?.file ?? '.env')
     }
+  }
 
-    const env = {} as any
+  private resolveEnv (file: any, opts: EZParsedLoadOptions): EZLoadType<P> {
+    const res: any = {}
 
     for (const name in this.properties) {
       const property = this.properties[name]
       let value: string | undefined
 
-      if (useProcessEnv) {
+      if (opts.mode !== Mode.FileOnly) {
         for (const key in process.env) {
-          if (name.localeCompare(key, undefined, { sensitivity })) continue
+          if (name.localeCompare(key, undefined, { sensitivity: opts.sensitivity })) continue
           value = process.env[key]
         }
       }
 
-      for (const key in fileResult) {
-        if (name.localeCompare(key, undefined, { sensitivity })) continue
-        value = fileResult[key]
+      if (file) {
+        for (const key in file) {
+          if (name.localeCompare(key, undefined, { sensitivity: opts.sensitivity })) continue
+          value = file[key]
+        }
       }
 
       if (value === undefined) {
         if (property.default !== null) {
-          env[name] = property.default
+          res[name] = property.default
         } else if (property.required === true) {
           throw new EZLoaderError(`property "${name}" is required`)
-        } else env[name] = null
-      } else env[name] = property.parse(value)
+        } else res[name] = null
+      } else res[name] = property.parse(value)
     }
 
-    return env
+    return res
+  }
+
+  private parseFile (content: string, opts: EZParsedLoadOptions): any {
+    const res = {}
+
+    let document: any
+
+    try {
+      document = grammar.parse(content)
+    } catch (error) {
+      throw new EZLoaderError(`failed to parse envFile: ${error.message}`)
+    }
+
+    for (const assignment of document.body) {
+      const name = assignment.lhs
+      const values = [] as any[]
+
+      for (const segment of assignment.rhs) {
+        const { type, value } = segment
+        if (type === 'Literal') {
+          values.push(value)
+        } else if (res[value] !== undefined) {
+          values.push(res[value])
+        } else if (opts.mode !== Mode.FileOnly) {
+          let match: string | undefined
+          for (const key in process.env) {
+            if (value.localeCompare(key, undefined, { sensitivity: opts.sensitivity })) continue
+            match = key
+          }
+          if (match) values.push(process.env[match])
+          else throw new EZLoaderError(`failed to substitute variable "${name}": no set variable "${value}"`)
+        } else throw new EZLoaderError(`failed to substitute variable "${name}": no set variable "${value}"`)
+      }
+
+      res[name] = values.join('')
+    }
+
+    const extra: string[] = []
+
+    for (const key in res) {
+      let match: string | undefined
+      for (const name in this.properties) {
+        if (name.localeCompare(key, undefined, { sensitivity: opts.sensitivity })) continue
+        match = name
+      }
+      if (match === undefined) extra.push(key)
+      else if (key !== match) {
+        res[match] = res[key]
+        delete res[key]
+      }
+    }
+
+    if (extra.length > 0) {
+      throw new EZLoaderError(`Unrecognized properties ${extra}`)
+    }
+
+    return res
+  }
+
+  loadSync (options: EZLoadOptions): EZLoadType<P> {
+    const opts = this.parseLoadOptions(options)
+
+    if (opts.mode !== Mode.NoFile) {
+      let content!: string
+
+      try {
+        content = fs.readFileSync(opts.filepath, 'utf8')
+      } catch (error) {
+        if (opts.mode === Mode.FileOnly) {
+          throw new EZLoaderError(`failed to load envFile: ${error.message}`)
+        }
+      }
+
+      if (content) {
+        const envfile = this.parseFile(content, opts)
+        return this.resolveEnv(envfile, opts)
+      } else {
+        return this.resolveEnv(null, opts)
+      }
+    } else {
+      return this.resolveEnv(null, opts)
+    }
+  }
+
+  async load (options: EZLoadOptions): Promise<EZLoadType<P>> {
+    const opts = this.parseLoadOptions(options)
+
+    if (opts.mode !== Mode.NoFile) {
+      let content!: string
+      try {
+        content = await new Promise((resolve, reject) => {
+          fs.readFile(opts.filepath, 'utf8', (err, res) => {
+            err ? reject(err) : resolve(res)
+          })
+        })
+      } catch (error) {
+        if (opts.mode === Mode.FileOnly) {
+          throw new EZLoaderError(`failed to load envFile: ${error.message}`)
+        }
+      }
+
+      if (content) {
+        const envfile = this.parseFile(content, opts)
+        return this.resolveEnv(envfile, opts)
+      } else {
+        return this.resolveEnv(null, opts)
+      }
+    } else {
+      return this.resolveEnv(null, opts)
+    }
   }
 }
