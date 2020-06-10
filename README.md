@@ -46,7 +46,7 @@ The following are options passable to `schema.load` and `schema.loadSync`.
 |------|----|-------|-----------|
 |`cwd`|`string`|`process.cwd()`|Path to the default directory to search for your schema file and env file|
 |`file`|`string`|`.env`|Path, relative to cwd or absolute, to the env file|
-|`mode`|`file_first | no_file | file_only`|`file_first`|configure whether use the file only, process.env only, or both
+|`mode`|`file_first`, `no_file`, `file_only`|`file_first`|configure whether use the file only, process.env only, or both
 |`matchCase`|`boolean`|`false`|use exact case matching for variable names. Ignores case by default. |
 
 
