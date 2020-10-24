@@ -63,5 +63,5 @@
 		"test": "npm run compile && nyc mocha --config mocharc.yml src/**/*.spec.ts"
 	},
 	"types": "types",
-	"version": "1.3.0"
+	"version": "1.3.1"
 }
