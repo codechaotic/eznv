@@ -162,7 +162,7 @@ export class EZSchema <P extends EZProperties> {
     return res
   }
 
-  loadSync (options: EZLoadOptions): EZLoadType<P> {
+  loadSync (options: EZLoadOptions = {}): EZLoadType<P> {
     const opts = this.parseLoadOptions(options)
 
     if (opts.mode !== Mode.NoFile) {
