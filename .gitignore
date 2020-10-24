@@ -9,3 +9,5 @@ src/grammar.ts
 *.js.map
 *.d.ts
 *.d.ts.map
+.env
+example.ts
